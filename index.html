@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>blah</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%22170%20290%20940%20790%22%3E%3Cstyle%3Epath%7Bfill%3A%23000%7D%40media%28prefers-color-scheme%3Adark%29%7Bpath%7Bfill%3A%23fff%7D%7D%3C/style%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M293%20313H987Q1087%20313%201087%20413V820Q1087%20920%20987%20920H485C465%20975%20420%201030%20340%201050C285%201062%20262%201040%20272%201018C292%20985%20303%20955%20307%20920H293Q193%20920%20193%20820V413Q193%20313%20293%20313ZM425%20565L855%20572Q892%20580%20890%20598C850%20700%20760%20778%20640%20778C520%20778%20430%20700%20392%20598Q390%20565%20425%20565Z%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#1a1b1e;--bg2:#232428;--bg3:#2c2d32;--line:#383a40;--txt:#e3e5e8;--mut:#9a9ea6;--brand:#ee3f65;--brand2:#ff7a95;--err:#ff6b6b}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{font:15px/1.45 "Figtree","Segoe UI",system-ui,sans-serif;background:var(--bg3);color:var(--txt)}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;border:0;border-radius:6px;background:var(--brand);color:#fff;padding:9px 14px;font-weight:600}
+button.ghost{background:transparent;color:var(--mut);padding:4px 8px}
+button.ghost:hover{color:var(--txt)}
+input:focus{border-color:var(--brand);outline:none}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+input{background:var(--bg1);border:1px solid var(--line);border-radius:6px;padding:10px 12px;width:100%}
+[hidden]{display:none!important}
+
+#login{height:100%;overflow:auto;display:flex;
+ background:radial-gradient(900px 600px at 12% 8%,rgba(255,77,109,.38),transparent 60%),radial-gradient(800px 600px at 92% 95%,rgba(150,15,60,.55),transparent 60%),linear-gradient(135deg,#14070d,#2a0c1b)}
+#login .box{width:min(440px,100%);min-height:100%;display:flex;flex-direction:column;justify-content:center;padding:40px 36px;background:rgba(18,12,16,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-right:1px solid rgba(255,255,255,.09);box-shadow:12px 0 48px rgba(0,0,0,.4);text-align:left}
+#login input{background:rgba(0,0,0,.35)}
+.brand{font-family:"Outfit","Figtree",system-ui,sans-serif;font-weight:600;display:flex;align-items:center;gap:10px;color:var(--txt)}
+.brand .logo{width:30px;height:26px;flex:none}
+.brand.big{justify-content:flex-start;gap:14px;margin-bottom:6px}
+.brand.big .logo{width:56px;height:47px}
+.brand.big h1{font-size:38px;font-weight:600;letter-spacing:-.025em}
+.form{display:grid;gap:12px;margin-top:10px}
+.sub{color:var(--mut);margin-bottom:4px}
+.small{font-size:13px;color:var(--mut);margin-top:4px}
+button.link{background:none;padding:0;color:var(--brand2);font-weight:600;font-size:inherit}
+button.link:hover{text-decoration:underline}
+.err{color:#ff8a9d;font-size:13px;min-height:18px}
+
+#app{height:100%;display:grid;grid-template-columns:auto 1fr}
+#side{background:var(--bg2);display:flex;flex-direction:column;min-height:0}
+#side h2{padding:12px 16px;font-size:22px;border-bottom:1px solid var(--line)}
+.sec{display:flex;justify-content:space-between;align-items:center;padding:14px 12px 6px 16px;color:var(--mut);font-size:13px}
+#chs{list-style:none;padding:0 8px;overflow:auto;flex:1}
+#chs li button{width:100%;text-align:left;background:transparent;color:var(--mut);padding:7px 10px;font-weight:500}
+#chs li button:hover{background:var(--bg3);color:var(--txt)}
+#chs li.on button{background:var(--bg3);color:#fff}
+#me{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg1)}
+#me .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;flex:none}
+#me .av{width:32px;height:32px;font-size:13px}
+
+#main{display:flex;flex-direction:column;min-height:0;min-width:0}
+#top{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line);font-weight:700}
+#menu{display:none}
+#msgs{flex:1;overflow:auto;padding:12px 0}
+.m{display:flex;gap:14px;padding:2px 16px}
+.m.first{margin-top:14px}
+.m:hover{background:rgba(255,255,255,.03)}
+.m .gut{width:38px;flex:none;font-size:10px;color:transparent;text-align:right;padding-top:4px}
+.m:hover .gut{color:var(--mut)}
+.m .who{font-weight:700;margin-right:8px}
+.m .when{color:var(--mut);font-size:12px}
+.m .body{overflow-wrap:anywhere;white-space:pre-wrap}
+.m.pend .body{opacity:.55}
+.empty{color:var(--mut);padding:24px 16px}
+#f{padding:0 16px 18px}
+#f input{background:var(--bg2);padding:12px 14px}
+
+#nav{display:flex;min-height:0}
+#side{width:240px}
+#side h2{font-family:"Outfit","Figtree",sans-serif;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#rail{width:72px;background:var(--bg1);display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px 0;overflow:auto}
+#srvs{display:flex;flex-direction:column;align-items:center;gap:10px}
+.srv{width:48px;height:48px;border-radius:50%;padding:0;background:var(--bg3);color:var(--txt);display:grid;place-items:center;font-weight:700;transition:border-radius .15s,background .15s}
+.srv:hover,.srv.on{border-radius:16px;background:var(--brand);color:#fff}
+.srv .logo{width:28px;height:24px}
+.srv.add{color:var(--brand2);font-size:24px;font-weight:500}
+.srv.add:hover{color:#fff}
+#inv{padding:8px 16px;font-size:13px;color:var(--mut);border-top:1px solid var(--line)}
+button.outline{background:transparent;border:1px solid var(--brand);color:var(--brand2)}
+dialog{background:var(--bg2);color:var(--txt);border:1px solid var(--line);border-radius:16px;padding:22px;width:min(380px,92vw);margin:auto}
+dialog::backdrop{background:rgba(0,0,0,.65)}
+dialog h3{font:600 18px "Outfit","Figtree",sans-serif}
+dialog hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+dialog .ghost{margin-top:8px}
+.av{background-size:cover;background-position:center}
+.av.sm{width:28px;height:28px;font-size:11px}
+.av.big{width:84px;height:84px;font-size:30px}
+.click{cursor:pointer}
+.who.click:hover{text-decoration:underline}
+#me .av,#me .nm{cursor:pointer}
+#me .nm:hover{text-decoration:underline}
+#sideHead{display:flex;align-items:center;border-bottom:1px solid var(--line)}
+#sideHead h2{flex:1;min-width:0;border:0}
+#sideHead .ghost{margin-right:8px;font-size:17px}
+#chs li button{display:flex;align-items:center;gap:8px}
+.pcard{display:flex;gap:16px;align-items:center}
+.pname{font:600 22px "Outfit","Figtree",sans-serif;overflow-wrap:anywhere}
+.pbio{color:var(--mut);margin-top:4px;overflow-wrap:anywhere}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.swatches{display:flex;gap:8px;flex-wrap:wrap}
+.swatches button{width:28px;height:28px;border-radius:50%;padding:0;border:2px solid transparent}
+.swatches button.on{border-color:#fff}
+.srv.pv,.srv.pv:hover{border-radius:16px;background-color:var(--bg3);cursor:default;flex:none}
+.m{position:relative}
+.acts{position:absolute;right:16px;top:-8px;display:flex;gap:4px;opacity:0;z-index:1}
+.m:hover .acts,.acts:focus-within{opacity:1}
+.acts>button{padding:2px 9px;font-size:12px;background:var(--bg2);color:var(--mut);border:1px solid var(--line)}
+.acts>button.del.arm{background:var(--err);border-color:var(--err);color:#fff}
+@media(hover:none){.acts{opacity:.85}}
+.picker{display:flex;gap:2px;padding:3px;background:var(--bg2);border:1px solid var(--line);border-radius:8px}
+.picker button{font-size:16px;padding:1px 6px;border:0;background:transparent}
+.rx{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.rx button{padding:1px 9px;border-radius:12px;background:var(--bg2);border:1px solid var(--line);color:var(--txt);font-weight:500;font-size:13px}
+.rx button.me{border-color:var(--brand);background:rgba(238,63,101,.16)}
+.banner{height:96px;margin:-22px -22px 16px;border-radius:16px 16px 0 0;background-size:cover;background-position:center}
+.empty p{max-width:440px;margin-bottom:14px}
+#chTitle.click:hover{text-decoration:underline}
+@media(max-width:700px){
+ #app{grid-template-columns:1fr}
+ #nav{position:fixed;inset:0 10% 0 0;z-index:5;transform:translateX(-100%);transition:transform .2s;box-shadow:4px 0 24px #0008}
+ #nav.open{transform:none}
+ #side{width:auto;flex:1}
+ #menu{display:block}
+}
+@media(prefers-reduced-motion:reduce){#nav{transition:none}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="logo" viewBox="170 290 940 790"><path fill="currentColor" fill-rule="evenodd" d="M293 313H987Q1087 313 1087 413V820Q1087 920 987 920H485C465 975 420 1030 340 1050C285 1062 262 1040 272 1018C292 985 303 955 307 920H293Q193 920 193 820V413Q193 313 293 313ZM425 565L855 572Q892 580 890 598C850 700 760 778 640 778C520 778 430 700 392 598Q390 565 425 565Z"/></symbol></svg>
+
+<section id="login">
+  <div class="box">
+    <div class="brand big"><svg class="logo" aria-hidden="true"><use href="#logo"/></svg><h1>blah</h1></div>
+    <form id="signin" class="form">
+      <p class="sub">Welcome, or welcome back.</p>
+      <input id="inUser" placeholder="Username" aria-label="Username" autocomplete="username" autocapitalize="none" spellcheck="false">
+      <input id="inPass" type="password" placeholder="Password" aria-label="Password" autocomplete="current-password">
+      <div class="err" id="err1" role="alert"></div>
+      <button type="submit">Log in</button>
+      <p class="small">New here? <button type="button" class="link" id="toSignup">Create an account</button></p>
+    </form>
+    <form id="signup" class="form" hidden>
+      <p class="sub">Create your account.</p>
+      <input id="upUser" maxlength="20" placeholder="Username" aria-label="Username" autocomplete="username" autocapitalize="none" spellcheck="false">
+      <input id="upPass" type="password" placeholder="Password" aria-label="Password" autocomplete="new-password">
+      <input id="upPass2" type="password" placeholder="Confirm password" aria-label="Confirm password" autocomplete="new-password">
+      <div class="err" id="err2" role="alert"></div>
+      <button type="submit">Create account</button>
+      <p class="small">Already have an account? <button type="button" class="link" id="toSignin">Log in</button></p>
+    </form>
+  </div>
+</section>
+
+<div id="app" hidden>
+  <div id="nav">
+    <nav id="rail" aria-label="Servers">
+      <button id="home" class="srv" title="Direct messages" aria-label="Direct messages"><svg class="logo" aria-hidden="true"><use href="#logo"/></svg></button>
+      <div id="srvs"></div>
+      <button id="addSrv" class="srv add" title="Create or join a server" aria-label="Create or join a server">+</button>
+    </nav>
+    <aside id="side">
+      <div id="sideHead"><h2 id="sideTitle">Direct messages</h2><button id="srvSet" class="ghost" hidden title="Server settings" aria-label="Server settings">⚙</button></div>
+      <div class="sec"><span id="listLabel">People</span><button id="addCh" class="ghost" title="New" aria-label="New">+</button></div>
+      <ul id="chs"></ul>
+      <div id="inv" hidden>Invite code: <button type="button" class="link" id="copyInv"></button></div>
+      <div id="me"><div class="av" id="meAv" title="Edit profile"></div><span class="nm" id="meNm" title="Edit profile"></span><button id="out" class="ghost">Sign out</button></div>
+    </aside>
+  </div>
+  <main id="main">
+    <div id="top"><button id="menu" class="ghost" aria-label="Menu">☰</button><span id="chTitle">blah</span></div>
+    <div id="msgs" aria-live="polite"></div>
+    <form id="f"><input id="txt" maxlength="2000" autocomplete="off"></form>
+  </main>
+</div>
+
+<dialog id="dlg">
+  <form id="mk" class="form"><h3>Create a server</h3>
+    <input id="mkName" maxlength="32" placeholder="Server name" aria-label="Server name">
+    <button type="submit">Create</button></form>
+  <hr>
+  <form id="jn" class="form"><h3>Join with a code</h3>
+    <input id="jnCode" maxlength="12" placeholder="Invite code" aria-label="Invite code" autocapitalize="none" spellcheck="false">
+    <button type="submit" class="outline">Join</button></form>
+  <div class="err" id="dErr" role="alert"></div>
+  <button type="button" class="ghost" id="dClose">Close</button>
+</dialog>
+
+<dialog id="pdlg">
+  <div class="banner" id="pBanner"></div>
+  <div class="pcard"><div class="av big" id="pAv"></div>
+    <div><div class="pname" id="pName"></div><div class="pbio" id="pBio"></div></div></div>
+  <div id="pEdit" class="form" hidden>
+    <input type="file" id="pFile" accept="image/*" hidden>
+    <input type="file" id="pBanFile" accept="image/*" hidden>
+    <div class="row"><button type="button" class="outline" id="pBanPick">Upload banner</button><button type="button" class="ghost" id="pBanClear">Remove banner</button></div>
+    <div class="row"><button type="button" class="outline" id="pPick">Upload photo</button><button type="button" class="ghost" id="pClear">Remove photo</button></div>
+    <div class="swatches" id="pColors" role="group" aria-label="Avatar color"></div>
+    <input id="pBioIn" maxlength="120" placeholder="About you" aria-label="About you">
+    <button type="button" id="pSave">Save profile</button>
+  </div>
+  <div class="form"><button type="button" id="pDm" hidden>Send message</button></div>
+  <div class="err" id="pErr" role="alert"></div>
+  <button type="button" class="ghost" id="pClose">Close</button>
+</dialog>
+
+<dialog id="sdlg">
+  <h3>Server settings</h3>
+  <div class="form">
+    <div class="row"><div class="srv pv" id="sIcon"></div>
+      <input type="file" id="sFile" accept="image/*" hidden>
+      <button type="button" class="outline" id="sPick">Upload icon</button><button type="button" class="ghost" id="sClear">Remove</button></div>
+    <input id="sName" maxlength="32" placeholder="Server name" aria-label="Server name">
+    <button type="button" id="sSave">Save</button>
+  </div>
+  <div class="err" id="sErr" role="alert"></div>
+  <button type="button" class="ghost" id="sClose">Close</button>
+</dialog>
+
+<script type="module">
+/* ============ 1. PASTE YOUR FIREBASE CONFIG HERE ============ */
+const firebaseConfig = {
+  apiKey: "AIzaSyBPOABkONRlTbOjbs5a7GQCWCxGTEBMdUo",
+  authDomain: "blahchatter.firebaseapp.com",
+  projectId: "blahchatter",
+  appId: "1:420178375007:web:197532956e108ac53886ea"
+};
+/* ============================================================ */
+
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+import {getAuth,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,updateProfile}
+  from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
+import {getFirestore,collection,addDoc,setDoc,getDoc,getDocs,updateDoc,arrayUnion,arrayRemove,doc,deleteDoc,query,where,orderBy,limit,onSnapshot,serverTimestamp}
+  from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
+
+// Invite code of the official blah server. Create the server in the app, copy its invite code
+// (bottom of its sidebar), and paste it here. Leave "" to hide the "Join the official blah server" button.
+const OFFICIAL_SERVER = "";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const $ = id => document.getElementById(id);
+
+let user = null, me = "";
+let servers = [], dms = [], chans = [];
+let view = null;                       // {kind:"home"} | {kind:"dm", id} | {kind:"server", sid, cid}
+let unsubs = [], unsubChans = null, unsubMsgs = null, curPath = null;
+let profiles = {}, lastDocs = [], firstLoad = true;
+const watching = new Set();
+
+const color = s => { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) % 360; return `hsl(${h} 55% 48%)`; };
+const initials = n => (n || "?").trim().slice(0, 2).toUpperCase();
+const slug = s => (s || "").toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 30);
+const code = () => Array.from(crypto.getRandomValues(new Uint8Array(6)), b => "abcdefghjkmnpqrstuvwxyz23456789"[b % 31]).join("");
+const dmName = d => (d.names && d.names[d.members.find(m => m !== user.uid)]) || "unknown";
+const fail = err => {
+  const box = $("msgs"); box.innerHTML = "";
+  const d = document.createElement("div"); d.className = "empty";
+  d.textContent = "Firestore said: " + err.message + " (check that your security rules are published)";
+  box.append(d);
+};
+
+/* ---------- profile pictures + server icons ---------- */
+const isImg = s => typeof s === "string" && s.startsWith("data:image/");
+const isHex = s => typeof s === "string" && /^#[0-9a-f]{6}$/i.test(s);
+function paint(el, pr, name, uid) {
+  pr = pr || {};
+  el.style.backgroundColor = isHex(pr.color) ? pr.color : color(uid || name);
+  el.style.backgroundSize = "cover"; el.style.backgroundPosition = "center";
+  if (isImg(pr.photo)) { el.style.backgroundImage = `url("${pr.photo}")`; el.textContent = ""; }
+  else { el.style.backgroundImage = ""; el.textContent = initials(name); }
+}
+function paintBanner(el, pr, uid) {
+  el.style.backgroundColor = isHex(pr.color) ? pr.color : color(uid);
+  el.style.backgroundImage = isImg(pr.banner) ? `url("${pr.banner}")` : "";
+}
+function paintServer(el, s) {
+  const ok = isImg(s.icon);
+  el.style.backgroundImage = ok ? `url("${s.icon}")` : "";
+  el.style.backgroundSize = "cover"; el.style.backgroundPosition = "center";
+  el.textContent = ok ? "" : initials(s.name);
+}
+function watchProfile(uid) {
+  if (watching.has(uid)) return; watching.add(uid);
+  unsubs.push(onSnapshot(doc(db, "users", uid), s => { profiles[uid] = s.exists() ? s.data() : {}; refresh(); }, () => {}));
+}
+function av(uid, name, cls = "") {
+  watchProfile(uid);
+  const d = document.createElement("div"); d.className = ("av " + cls).trim();
+  paint(d, profiles[uid], name, uid); return d;
+}
+let raf = 0;
+function refresh() {
+  if (raf) return;
+  raf = requestAnimationFrame(() => { raf = 0; if (!user) return; updateMe(); renderSide(); renderMsgs(false); });
+}
+function updateMe() { paint($("meAv"), profiles[user.uid], me, user.uid); }
+// Crops + shrinks to w x h (JPEG). GIFs are kept as-is (animated) when anim is true and the file is small enough.
+function prepImage(file, w = 128, h = w, anim = true) {
+  return new Promise((res, rej) => {
+    if (anim && file.type === "image/gif") {
+      if (file.size > 400000) return rej(new Error("That GIF is over 400 KB. Try a smaller one."));
+      const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(new Error("Couldn't read that file.")); r.readAsDataURL(file); return;
+    }
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const k = Math.max(w / img.width, h / img.height), sw = w / k, sh = h / k;
+      const c = document.createElement("canvas"); c.width = w; c.height = h;
+      const g = c.getContext("2d"); g.fillStyle = "#2c2d32"; g.fillRect(0, 0, w, h);
+      g.drawImage(img, (img.width - sw) / 2, (img.height - sh) / 2, sw, sh, 0, 0, w, h);
+      URL.revokeObjectURL(url); res(c.toDataURL("image/jpeg", 0.85));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("That file isn't an image we can read.")); };
+    img.src = url;
+  });
+}
+const toSquare = f => prepImage(f);
+
+const EMOJI = {like: "👍", heart: "❤️", laugh: "😂", wow: "😮", sad: "😢", fire: "🔥"};
+async function react(path, m, key) {
+  const has = ((m.reactions || {})[key] || []).includes(user.uid);
+  try { await updateDoc(doc(db, ...path, m.id), {["reactions." + key]: has ? arrayRemove(user.uid) : arrayUnion(user.uid)}); }
+  catch (err) { alert("Couldn't react: " + err.message); }
+}
+
+/* ---------- auth ---------- */
+// Firebase Auth needs an email, so a username becomes username@users.blah.chat behind the scenes.
+const toEmail = n => n.toLowerCase() + "@users.blah.chat";
+const nameOf = u => u.displayName || (u.email || "").split("@")[0];
+const BAD = "Wrong username or password.";
+const MSG = {
+  "auth/invalid-credential": BAD, "auth/invalid-login-credentials": BAD, "auth/user-not-found": BAD, "auth/wrong-password": BAD,
+  "auth/email-already-in-use": "That username is taken.",
+  "auth/weak-password": "Password needs at least 6 characters.",
+  "auth/too-many-requests": "Too many attempts. Try again in a few minutes.",
+  "auth/network-request-failed": "Can't reach Firebase. Check your connection.",
+  "auth/operation-not-allowed": "Turn on Email/Password in Firebase Console → Authentication → Sign-in method."
+};
+const showErr = (id, e) => { $(id).textContent = typeof e === "string" ? e : (MSG[e.code] || e.message); };
+const show = which => {
+  $("signin").hidden = which !== "signin"; $("signup").hidden = which !== "signup";
+  $("err1").textContent = $("err2").textContent = "";
+};
+$("toSignup").onclick = () => show("signup");
+$("toSignin").onclick = () => show("signin");
+
+let creating = false;
+$("signin").onsubmit = async e => {
+  e.preventDefault();
+  const n = $("inUser").value.trim(), pw = $("inPass").value;
+  if (!n || !pw) return showErr("err1", "Enter your username and password.");
+  try { await signInWithEmailAndPassword(auth, toEmail(n), pw); } catch (err) { showErr("err1", err); }
+};
+$("signup").onsubmit = async e => {
+  e.preventDefault();
+  const n = $("upUser").value.trim(), pw = $("upPass").value;
+  if (!/^[A-Za-z0-9_]{3,20}$/.test(n)) return showErr("err2", "Username: 3–20 letters, numbers or underscores.");
+  if (pw.length < 6) return showErr("err2", "Password needs at least 6 characters.");
+  if (pw !== $("upPass2").value) return showErr("err2", "Passwords don't match.");
+  creating = true;
+  try {
+    const {user: u} = await createUserWithEmailAndPassword(auth, toEmail(n), pw);
+    try { await updateProfile(u, {displayName: n}); } catch {}
+    creating = false;
+    start(auth.currentUser);
+  } catch (err) { creating = false; showErr("err2", err); }
+};
+$("out").onclick = () => signOut(auth);
+onAuthStateChanged(auth, u => { if (creating) return; u ? start(u) : stop(); });
+
+function start(u) {
+  unsubs.forEach(f => f()); unsubs = []; watching.clear(); profiles = {};
+  user = u; me = nameOf(u);
+  $("login").hidden = true; $("app").hidden = false;
+  $("meNm").textContent = me;
+  watchProfile(u.uid); updateMe();
+  // public directory entry so people can find you by username for DMs
+  setDoc(doc(db, "users", u.uid), {name: me, nameLower: me.toLowerCase()}, {merge: true}).catch(() => {});
+  unsubs.push(onSnapshot(query(collection(db, "servers"), where("members", "array-contains", u.uid)), snap => {
+    servers = snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a, b) => a.name.localeCompare(b.name));
+    if (view && view.kind === "server" && !servers.find(s => s.id === view.sid)) return go({kind: "home"});
+    renderRail(); renderSide();
+    if (view.kind === "home") openMsgs();
+  }, fail));
+  unsubs.push(onSnapshot(query(collection(db, "dms"), where("members", "array-contains", u.uid)), snap => {
+    dms = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    renderSide();
+  }, fail));
+  go({kind: "home"});
+}
+function stop() {
+  unsubs.forEach(f => f()); unsubs = []; watching.clear(); profiles = {};
+  unsubChans && unsubChans(); unsubMsgs && unsubMsgs(); unsubChans = unsubMsgs = null;
+  user = null; view = null; servers = []; dms = []; chans = []; curPath = null;
+  $("app").hidden = true; $("login").hidden = false;
+  $("inPass").value = ""; show("signin");
+}
+
+/* ---------- navigation ---------- */
+function go(v) {
+  view = v; chans = [];
+  unsubChans && unsubChans(); unsubChans = null;
+  if (v.kind === "server") {
+    unsubChans = onSnapshot(query(collection(db, "servers", v.sid, "channels"), orderBy("createdAt")), snap => {
+      if (view !== v) return;
+      chans = snap.docs.map(d => ({id: d.id, ...d.data()}));
+      if (!v.cid && chans.length) { v.cid = chans[0].id; openMsgs(); }
+      renderSide();
+    }, fail);
+  }
+  renderRail(); renderSide(); openMsgs();
+}
+
+function renderRail() {
+  $("home").classList.toggle("on", view.kind !== "server");
+  const box = $("srvs"); box.innerHTML = "";
+  for (const s of servers) {
+    const b = document.createElement("button");
+    b.className = "srv" + (view.kind === "server" && view.sid === s.id ? " on" : "");
+    paintServer(b, s); b.title = s.name; b.setAttribute("aria-label", s.name);
+    b.onclick = () => go({kind: "server", sid: s.id});
+    box.append(b);
+  }
+}
+
+function linkTitle() {
+  const t = $("chTitle");
+  if (view && view.kind === "dm") {
+    const d = dms.find(x => x.id === view.id);
+    if (d) {
+      const o = d.members.find(m => m !== user.uid), n = dmName(d);
+      t.textContent = "@ " + n; t.className = "click"; t.title = "View profile"; t.onclick = () => openProfile(o, n); return;
+    }
+  }
+  t.className = ""; t.title = ""; t.onclick = null;
+}
+
+function renderSide() {
+  if (!view) return;
+  linkTitle();
+  const ul = $("chs"); ul.innerHTML = "";
+  const item = (label, on, fn, lead) => {
+    const li = document.createElement("li"); if (on) li.className = "on";
+    const b = document.createElement("button"); b.textContent = label; if (lead) b.prepend(lead);
+    b.onclick = () => { fn(); $("nav").classList.remove("open"); };
+    li.append(b); ul.append(li);
+  };
+  if (view.kind === "server") {
+    const s = servers.find(x => x.id === view.sid);
+    $("sideTitle").textContent = s ? s.name : "…";
+    $("srvSet").hidden = !(s && s.ownerId === user.uid);
+    $("listLabel").textContent = "Channels"; $("addCh").title = $("addCh").ariaLabel = "New channel";
+    chans.forEach(c => item("# " + c.name, c.id === view.cid, () => { view.cid = c.id; renderSide(); openMsgs(); }));
+    $("inv").hidden = false; $("copyInv").textContent = view.sid;
+  } else {
+    $("sideTitle").textContent = "Direct messages"; $("srvSet").hidden = true;
+    $("listLabel").textContent = "People"; $("addCh").title = $("addCh").ariaLabel = "New message";
+    dms.forEach(d => { const o = d.members.find(m => m !== user.uid); item(dmName(d), view.kind === "dm" && view.id === d.id, () => go({kind: "dm", id: d.id}), av(o, dmName(d), "sm")); });
+    $("inv").hidden = true;
+  }
+}
+
+/* ---------- servers, channels, DMs ---------- */
+$("home").onclick = () => { go({kind: "home"}); $("nav").classList.remove("open"); };
+$("menu").onclick = () => $("nav").classList.toggle("open");
+$("addCh").onclick = () => view.kind === "server" ? newChannel() : newDM();
+$("addSrv").onclick = () => { $("dErr").textContent = ""; $("dlg").showModal(); };
+$("dClose").onclick = () => $("dlg").close();
+
+$("mk").onsubmit = async e => {
+  e.preventDefault();
+  const name = $("mkName").value.trim(); if (!name) return;
+  const id = code();
+  try {
+    await setDoc(doc(db, "servers", id), {name, ownerId: user.uid, members: [user.uid], createdAt: serverTimestamp()});
+    await setDoc(doc(db, "servers", id, "channels", "general"), {name: "general", createdAt: serverTimestamp()});
+    $("mkName").value = ""; $("dlg").close();
+    go({kind: "server", sid: id, cid: "general"});
+  } catch (err) { $("dErr").textContent = err.message; }
+};
+async function joinServer(id) {
+  const ref = doc(db, "servers", id);
+  try {
+    if (!(await getDoc(ref)).exists()) return "No server with that code.";
+    if (!servers.find(s => s.id === id)) await updateDoc(ref, {members: arrayUnion(user.uid)});
+    go({kind: "server", sid: id});
+    return "";
+  } catch (err) { return err.code === "permission-denied" ? "No server with that code." : err.message; }
+}
+$("jn").onsubmit = async e => {
+  e.preventDefault();
+  const id = $("jnCode").value.trim().toLowerCase(); if (!id) return;
+  const msg = await joinServer(id);
+  $("dErr").textContent = msg;
+  if (!msg) { $("jnCode").value = ""; $("dlg").close(); }
+};
+$("copyInv").onclick = async () => {
+  try { await navigator.clipboard.writeText(view.sid); $("copyInv").textContent = "Copied!"; setTimeout(renderSide, 1200); }
+  catch { prompt("Invite code", view.sid); }
+};
+
+async function newChannel() {
+  const name = slug(prompt("New channel name")); if (!name) return;
+  try {
+    await setDoc(doc(db, "servers", view.sid, "channels", name), {name, createdAt: serverTimestamp()});
+    view.cid = name; renderSide(); openMsgs();
+  } catch (err) { alert(err.message); }
+}
+async function newDM() {
+  const raw = (prompt("Username to message") || "").trim().toLowerCase(); if (!raw) return;
+  try {
+    const snap = await getDocs(query(collection(db, "users"), where("nameLower", "==", raw), limit(1)));
+    if (snap.empty) return alert("No one named “" + raw + "” yet. They need to log in to blah once.");
+    const other = snap.docs[0];
+    if (other.id === user.uid) return alert("That's you!");
+    await openDM(other.id, other.data().name);
+  } catch (err) { alert(err.message); }
+}
+async function openDM(otherId, otherName) {
+  const members = [user.uid, otherId].sort();
+  const id = members.join("_");
+  await setDoc(doc(db, "dms", id), {members, names: {[user.uid]: me, [otherId]: otherName}});
+  go({kind: "dm", id});
+}
+
+/* ---------- messages (live) ---------- */
+function openMsgs() {
+  unsubMsgs && unsubMsgs(); unsubMsgs = null;
+  const box = $("msgs");
+  let title = "";
+  curPath = null; lastDocs = []; firstLoad = true;
+  if (view.kind === "server" && view.cid) {
+    const c = chans.find(x => x.id === view.cid);
+    curPath = ["servers", view.sid, "channels", view.cid, "messages"]; title = "# " + (c ? c.name : view.cid);
+  } else if (view.kind === "dm") {
+    const d = dms.find(x => x.id === view.id);
+    curPath = ["dms", view.id, "messages"]; title = "@ " + (d ? dmName(d) : "…");
+  }
+  $("chTitle").textContent = curPath ? title : "blah";
+  linkTitle();
+  $("txt").disabled = !curPath;
+  $("txt").placeholder = curPath ? "Message " + title : "Nothing open yet";
+  if (!curPath) {
+    box.innerHTML = "";
+    const d = document.createElement("div"); d.className = "empty";
+    const t = document.createElement("p");
+    t.textContent = view.kind === "server" ? "This server has no channels yet. Press + to add one."
+      : "Pick a conversation, or press + next to People to message someone by username. Use the + in the left bar to create or join a server.";
+    d.append(t);
+    if (view.kind === "home" && OFFICIAL_SERVER) {
+      const b = document.createElement("button");
+      b.textContent = servers.some(s => s.id === OFFICIAL_SERVER) ? "Open the official blah server" : "Join the official blah server";
+      b.onclick = async () => { b.disabled = true; const msg = await joinServer(OFFICIAL_SERVER); if (msg) { b.disabled = false; alert(msg); } };
+      d.append(b);
+    }
+    box.append(d); return;
+  }
+  const q = query(collection(db, ...curPath), orderBy("createdAt", "desc"), limit(100));
+  unsubMsgs = onSnapshot(q, snap => {
+    lastDocs = snap.docs.map(d => ({id: d.id, ...d.data({serverTimestamps: "estimate"}), pending: d.metadata.hasPendingWrites})).reverse();
+    renderMsgs(true);
+  }, fail);
+}
+
+function renderMsgs(fromSnap) {
+  if (!curPath || (firstLoad && !fromSnap)) return;
+  const box = $("msgs"), path = curPath;
+  const srv = view.kind === "server" ? servers.find(s => s.id === view.sid) : null;
+  const owner = !!srv && srv.ownerId === user.uid;
+  const top = box.scrollTop, nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 120;
+  box.innerHTML = "";
+  if (!lastDocs.length) { const d = document.createElement("div"); d.className = "empty"; d.textContent = "No messages yet. Say something."; box.append(d); }
+  let prev = null;
+  for (const m of lastDocs) {
+    const t = m.createdAt ? m.createdAt.toDate() : new Date();
+    const joined = prev && prev.uid === m.uid && t - prev.t < 5 * 60e3;
+    const row = document.createElement("div");
+    row.className = "m" + (joined ? "" : " first") + (m.pending ? " pend" : "");
+    const time = t.toLocaleTimeString([], {hour: "numeric", minute: "2-digit"});
+    if (joined) {
+      const g = document.createElement("div"); g.className = "gut"; g.textContent = time; row.append(g);
+    } else {
+      const a = av(m.uid, m.name, "click"); a.onclick = () => openProfile(m.uid, m.name); row.append(a);
+    }
+    const c = document.createElement("div");
+    if (!joined) {
+      const h = document.createElement("div");
+      const w = document.createElement("span"); w.className = "who click"; w.textContent = m.name; w.style.color = color(m.uid);
+      w.onclick = () => openProfile(m.uid, m.name);
+      const s = document.createElement("span"); s.className = "when"; s.textContent = t.toLocaleDateString([], {month: "short", day: "numeric"}) + ", " + time;
+      h.append(w, s); c.append(h);
+    }
+    const b = document.createElement("div"); b.className = "body"; b.textContent = m.text; c.append(b);
+    const rx = document.createElement("div"); rx.className = "rx";
+    for (const k of Object.keys(EMOJI)) {
+      const who = (m.reactions && m.reactions[k]) || [];
+      if (!who.length) continue;
+      const b = document.createElement("button"); b.type = "button";
+      b.className = who.includes(user.uid) ? "me" : ""; b.textContent = EMOJI[k] + " " + who.length;
+      b.onclick = () => react(path, m, k); rx.append(b);
+    }
+    if (rx.children.length) c.append(rx);
+    row.append(c);
+    if (m.id) {
+      const acts = document.createElement("div"); acts.className = "acts";
+      const rb = document.createElement("button"); rb.type = "button"; rb.textContent = "☺"; rb.setAttribute("aria-label", "Add reaction");
+      rb.onclick = () => {
+        const old = acts.querySelector(".picker"); if (old) return old.remove();
+        const pk = document.createElement("div"); pk.className = "picker";
+        for (const k of Object.keys(EMOJI)) {
+          const e = document.createElement("button"); e.type = "button"; e.textContent = EMOJI[k];
+          e.onclick = () => react(path, m, k); pk.append(e);
+        }
+        acts.prepend(pk);
+      };
+      acts.append(rb);
+      if (m.uid === user.uid || owner) {
+        const x = document.createElement("button"); x.type = "button"; x.className = "del"; x.textContent = "Delete";
+        x.setAttribute("aria-label", "Delete message");
+        let timer;
+        x.onclick = async () => {
+          if (!x.classList.contains("arm")) {
+            x.classList.add("arm"); x.textContent = "Sure?";
+            timer = setTimeout(() => { x.classList.remove("arm"); x.textContent = "Delete"; }, 3000); return;
+          }
+          clearTimeout(timer);
+          try { await deleteDoc(doc(db, ...path, m.id)); } catch (err) { alert("Couldn't delete: " + err.message); }
+        };
+        acts.append(x);
+      }
+      row.append(acts);
+    }
+    box.append(row);
+    prev = {uid: m.uid, t};
+  }
+  if (firstLoad || nearBottom) box.scrollTop = box.scrollHeight; else box.scrollTop = top;
+  if (fromSnap) firstLoad = false;
+}
+
+$("f").onsubmit = async e => {
+  e.preventDefault();
+  const text = $("txt").value.trim();
+  if (!text || !user || !curPath) return;
+  $("txt").value = "";
+  try {
+    await addDoc(collection(db, ...curPath), {text, uid: user.uid, name: me, createdAt: serverTimestamp()});
+    const box = $("msgs"); box.scrollTop = box.scrollHeight;
+  } catch (err) { alert("Send failed: " + err.message); $("txt").value = text; }
+};
+/* ---------- profile dialog ---------- */
+const COLORS = ["#ee3f65", "#f59e0b", "#22c55e", "#14b8a6", "#3b82f6", "#8b5cf6", "#ec4899", "#64748b"];
+let draft = {}, pUid = null, sdraft = {};
+COLORS.forEach(c => {
+  const b = document.createElement("button"); b.type = "button"; b.style.background = c; b.dataset.c = c; b.setAttribute("aria-label", "Color " + c);
+  b.onclick = () => { draft.color = draft.color === c ? "" : c; drawProfile(); };
+  $("pColors").append(b);
+});
+function drawProfile() {
+  paint($("pAv"), draft, $("pName").textContent, pUid); paintBanner($("pBanner"), draft, pUid);
+  [...$("pColors").children].forEach(b => b.classList.toggle("on", b.dataset.c === draft.color));
+}
+function openProfile(uid, name) {
+  pUid = uid; watchProfile(uid);
+  const pr = profiles[uid] || {}, mine = uid === user.uid;
+  draft = {photo: pr.photo || "", color: pr.color || "", banner: pr.banner || ""};
+  $("pName").textContent = name;
+  $("pBio").textContent = mine ? "" : (pr.bio || "No bio yet.");
+  $("pBioIn").value = pr.bio || "";
+  $("pEdit").hidden = !mine; $("pDm").hidden = mine; $("pErr").textContent = "";
+  drawProfile(); $("pdlg").showModal();
+}
+$("meAv").onclick = $("meNm").onclick = () => openProfile(user.uid, me);
+$("pClose").onclick = () => $("pdlg").close();
+$("pPick").onclick = () => $("pFile").click();
+$("pClear").onclick = () => { draft.photo = ""; drawProfile(); };
+$("pFile").onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  try { draft.photo = await toSquare(f); drawProfile(); } catch (err) { $("pErr").textContent = err.message; }
+};
+$("pSave").onclick = async () => {
+  try {
+    await setDoc(doc(db, "users", user.uid), {photo: draft.photo, color: draft.color, banner: draft.banner, bio: $("pBioIn").value.trim().slice(0, 120)}, {merge: true});
+    $("pdlg").close();
+  } catch (err) { $("pErr").textContent = err.message; }
+};
+$("pDm").onclick = async () => {
+  try { $("pdlg").close(); await openDM(pUid, $("pName").textContent); $("nav").classList.remove("open"); } catch (err) { alert(err.message); }
+};
+$("pBanPick").onclick = () => $("pBanFile").click();
+$("pBanClear").onclick = () => { draft.banner = ""; drawProfile(); };
+$("pBanFile").onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  try { draft.banner = await prepImage(f, 480, 160, false); drawProfile(); } catch (err) { $("pErr").textContent = err.message; }
+};
+
+/* ---------- server settings (owner only) ---------- */
+const drawServer = () => paintServer($("sIcon"), {name: $("sName").value || "?", icon: sdraft.icon});
+$("srvSet").onclick = () => {
+  const s = servers.find(x => x.id === view.sid); if (!s) return;
+  sdraft = {icon: s.icon || ""}; $("sName").value = s.name; $("sErr").textContent = "";
+  drawServer(); $("sdlg").showModal();
+};
+$("sName").oninput = drawServer;
+$("sClose").onclick = () => $("sdlg").close();
+$("sPick").onclick = () => $("sFile").click();
+$("sClear").onclick = () => { sdraft.icon = ""; drawServer(); };
+$("sFile").onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  try { sdraft.icon = await toSquare(f); drawServer(); } catch (err) { $("sErr").textContent = err.message; }
+};
+$("sSave").onclick = async () => {
+  const name = $("sName").value.trim().slice(0, 32);
+  if (!name) return $("sErr").textContent = "Give the server a name.";
+  try { await updateDoc(doc(db, "servers", view.sid), {name, icon: sdraft.icon}); $("sdlg").close(); }
+  catch (err) { $("sErr").textContent = err.message; }
+};
+</script>
+
+<!--
+FIRESTORE SECURITY RULES (Firebase Console → Firestore → Rules → Publish):
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function inServer(s) { return signedIn() && request.auth.uid in get(/databases/$(database)/documents/servers/$(s)).data.members; }
+    function inDm(d) { return signedIn() && request.auth.uid in get(/databases/$(database)/documents/dms/$(d)).data.members; }
+    function okMsg() { return request.resource.data.uid == request.auth.uid && request.resource.data.text is string && request.resource.data.text.size() <= 2000; }
+
+    match /users/{u} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.uid == u
+        && (!('photo' in request.resource.data) || request.resource.data.photo.size() < 600000)
+        && (!('banner' in request.resource.data) || request.resource.data.banner.size() < 100000)
+        && (!('bio' in request.resource.data) || request.resource.data.bio.size() <= 120);
+    }
+
+    match /servers/{s} {
+      allow get: if signedIn();
+      allow list: if signedIn() && request.auth.uid in resource.data.members;
+      allow create: if signedIn() && request.resource.data.members == [request.auth.uid] && request.resource.data.ownerId == request.auth.uid;
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members'])
+        && request.resource.data.members.hasAll(resource.data.members)
+        && request.resource.data.members.size() <= resource.data.members.size() + 1
+        && request.auth.uid in request.resource.data.members;
+      allow update: if signedIn() && request.auth.uid == resource.data.ownerId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'icon'])
+        && request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 32
+        && (!('icon' in request.resource.data) || request.resource.data.icon.size() < 600000);
+      match /channels/{c} {
+        allow read, create: if inServer(s);
+        match /messages/{m} {
+          allow read: if inServer(s);
+          allow create: if inServer(s) && okMsg();
+          allow update: if inServer(s) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions']);
+          allow delete: if signedIn() && (resource.data.uid == request.auth.uid
+            || request.auth.uid == get(/databases/$(database)/documents/servers/$(s)).data.ownerId);
+        }
+      }
+    }
+
+    match /dms/{d} {
+      allow read: if signedIn() && request.auth.uid in resource.data.members;
+      allow create: if signedIn() && request.auth.uid in request.resource.data.members && request.resource.data.members.size() == 2;
+      allow update: if signedIn() && request.auth.uid in resource.data.members && request.resource.data.members == resource.data.members;
+      match /messages/{m} {
+        allow read: if inDm(d);
+        allow create: if inDm(d) && okMsg();
+        allow update: if inDm(d) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions']);
+        allow delete: if inDm(d) && resource.data.uid == request.auth.uid;
+      }
+    }
+  }
+}
+-->
+</body>
+</html>
