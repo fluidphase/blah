@@ -98,6 +98,7 @@ dialog .ghost{margin-top:8px}
 #chs li button{display:flex;align-items:center;gap:8px}
 .pcard{display:flex;gap:16px;align-items:center}
 .pname{font:600 22px "Outfit","Figtree",sans-serif;overflow-wrap:anywhere}
+.puser{color:var(--mut);font-size:14px}
 .pbio{color:var(--mut);margin-top:4px;overflow-wrap:anywhere}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .swatches{display:flex;gap:8px;flex-wrap:wrap}
@@ -118,6 +119,35 @@ dialog .ghost{margin-top:8px}
 .banner{height:96px;margin:-22px -22px 16px;border-radius:16px 16px 0 0;background-size:cover;background-position:center}
 .empty p{max-width:440px;margin-bottom:14px}
 #chTitle.click:hover{text-decoration:underline}
+#bar{display:flex;align-items:center;gap:8px}
+#attach,#emBtn{font-size:20px;padding:6px 10px}
+#prev{display:flex;align-items:center;gap:10px;padding:0 0 8px}
+#prev img{height:64px;max-width:140px;object-fit:cover;border-radius:6px}
+.pic{display:block;max-width:min(100%,360px);height:auto;margin-top:4px;border-radius:8px;cursor:zoom-in}
+#ldlg{padding:0;background:transparent;border:0;max-width:96vw}
+#ldlg img{display:block;max-width:96vw;max-height:90vh;border-radius:8px;cursor:zoom-out}
+.emoji{width:22px;height:22px;object-fit:contain;vertical-align:-5px}
+.emoji.big{width:48px;height:48px;vertical-align:middle}
+#edlg{width:min(480px,94vw)}
+.egrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:8px;max-height:44vh;overflow:auto;margin-top:12px}
+.egrid .small{grid-column:1/-1}
+.eitem{position:relative;display:grid;justify-items:center;gap:4px;padding:8px 4px;background:var(--bg3);color:var(--txt);font-size:11px;font-weight:500;overflow:hidden}
+.eitem img{width:36px;height:36px;object-fit:contain}
+.eitem span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.eitem .x{position:absolute;top:2px;right:2px;padding:0 6px;font-size:12px;background:var(--bg1);color:var(--mut)}
+.picker{flex-wrap:wrap;max-width:250px;max-height:150px;overflow:auto}
+.acts{align-items:flex-start}
+#vbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 16px;background:var(--bg2);border-bottom:1px solid var(--line)}
+#vbar #vTitle{font-weight:600}
+#vbar .small{flex:1;margin:0}
+#vbar button{padding:5px 12px}
+#vLeave{background:var(--err)}
+.vps{list-style:none;padding:0 0 4px 22px}
+.vp{display:flex;align-items:center;gap:8px;padding:3px 6px;color:var(--mut);font-size:13px}
+.vp .av{width:22px;height:22px;font-size:9px}
+.vp.speaking .av{box-shadow:0 0 0 2px #3ddc84}
+.opt{display:flex;align-items:center;gap:6px;cursor:pointer}
+#cdlg input[type=radio]{width:auto}
 @media(max-width:700px){
  #app{grid-template-columns:1fr}
  #nav{position:fixed;inset:0 10% 0 0;z-index:5;transform:translateX(-100%);transition:transform .2s;box-shadow:4px 0 24px #0008}
@@ -145,6 +175,7 @@ dialog .ghost{margin-top:8px}
     <form id="signup" class="form" hidden>
       <p class="sub">Create your account.</p>
       <input id="upUser" maxlength="20" placeholder="Username" aria-label="Username" autocomplete="username" autocapitalize="none" spellcheck="false">
+      <input id="upDisp" maxlength="32" placeholder="Display name (optional)" aria-label="Display name" autocomplete="nickname">
       <input id="upPass" type="password" placeholder="Password" aria-label="Password" autocomplete="new-password">
       <input id="upPass2" type="password" placeholder="Confirm password" aria-label="Confirm password" autocomplete="new-password">
       <div class="err" id="err2" role="alert"></div>
@@ -160,6 +191,7 @@ dialog .ghost{margin-top:8px}
       <button id="home" class="srv" title="Direct messages" aria-label="Direct messages"><svg class="logo" aria-hidden="true"><use href="#logo"/></svg></button>
       <div id="srvs"></div>
       <button id="addSrv" class="srv add" title="Create or join a server" aria-label="Create or join a server">+</button>
+      <button id="emojiBtn" class="srv add" title="Emojis" aria-label="Emojis">😀</button>
     </nav>
     <aside id="side">
       <div id="sideHead"><h2 id="sideTitle">Direct messages</h2><button id="srvSet" class="ghost" hidden title="Server settings" aria-label="Server settings">⚙</button></div>
@@ -171,8 +203,15 @@ dialog .ghost{margin-top:8px}
   </div>
   <main id="main">
     <div id="top"><button id="menu" class="ghost" aria-label="Menu">☰</button><span id="chTitle">blah</span></div>
+    <div id="vbar" hidden><span id="vTitle"></span><span id="vStatus" class="small"></span>
+      <button type="button" id="vMute" class="outline">Mute</button><button type="button" id="vLeave">Leave</button></div>
+    <div id="vaudio" hidden></div>
     <div id="msgs" aria-live="polite"></div>
-    <form id="f"><input id="txt" maxlength="2000" autocomplete="off"></form>
+    <form id="f">
+      <div id="prev" hidden><img id="pvImg" alt="Attached image preview"><button type="button" class="ghost" id="pvX">✕ Remove</button></div>
+      <div id="bar"><button type="button" id="attach" class="ghost" aria-label="Attach image" title="Attach image">📎</button><button type="button" id="emBtn" class="ghost" aria-label="Emojis" title="Emojis">😀</button>
+        <input id="txt" maxlength="2000" autocomplete="off"><input type="file" id="imgFile" accept="image/*" hidden></div>
+    </form>
   </main>
 </div>
 
@@ -191,13 +230,14 @@ dialog .ghost{margin-top:8px}
 <dialog id="pdlg">
   <div class="banner" id="pBanner"></div>
   <div class="pcard"><div class="av big" id="pAv"></div>
-    <div><div class="pname" id="pName"></div><div class="pbio" id="pBio"></div></div></div>
+    <div><div class="pname" id="pName"></div><div class="puser" id="pUser"></div><div class="pbio" id="pBio"></div></div></div>
   <div id="pEdit" class="form" hidden>
     <input type="file" id="pFile" accept="image/*" hidden>
     <input type="file" id="pBanFile" accept="image/*" hidden>
     <div class="row"><button type="button" class="outline" id="pBanPick">Upload banner</button><button type="button" class="ghost" id="pBanClear">Remove banner</button></div>
     <div class="row"><button type="button" class="outline" id="pPick">Upload photo</button><button type="button" class="ghost" id="pClear">Remove photo</button></div>
     <div class="swatches" id="pColors" role="group" aria-label="Avatar color"></div>
+    <input id="pDisp" maxlength="32" placeholder="Display name" aria-label="Display name">
     <input id="pBioIn" maxlength="120" placeholder="About you" aria-label="About you">
     <button type="button" id="pSave">Save profile</button>
   </div>
@@ -205,6 +245,34 @@ dialog .ghost{margin-top:8px}
   <div class="err" id="pErr" role="alert"></div>
   <button type="button" class="ghost" id="pClose">Close</button>
 </dialog>
+
+<dialog id="cdlg">
+  <h3>New channel</h3>
+  <form id="cf" class="form">
+    <div class="row"><label class="opt"><input type="radio" name="ctype" value="text" checked> # Text</label>
+      <label class="opt"><input type="radio" name="ctype" value="voice"> 🔊 Voice</label></div>
+    <input id="cName" maxlength="30" placeholder="channel-name" aria-label="Channel name" autocapitalize="none" spellcheck="false">
+    <button type="submit">Create</button>
+  </form>
+  <div class="err" id="cErr" role="alert"></div>
+  <button type="button" class="ghost" id="cClose">Close</button>
+</dialog>
+
+<dialog id="edlg">
+  <h3>Emojis</h3>
+  <form id="ef" class="form">
+    <div class="row"><input id="eName" maxlength="24" placeholder="name (a-z, 0-9, _)" aria-label="Emoji name" autocapitalize="none" spellcheck="false" style="flex:1;min-width:0">
+      <button type="button" class="outline" id="ePick">Choose image</button></div>
+    <input type="file" id="eFile" accept="image/*" hidden>
+    <div class="row"><img id="ePv" class="emoji big" alt="Emoji preview" hidden><button type="submit">Add emoji</button></div>
+  </form>
+  <div class="err" id="eErr" role="alert"></div>
+  <div class="small" id="eMsg">Tap an emoji to use it. Type :name: in any message.</div>
+  <div class="egrid" id="eGrid"></div>
+  <button type="button" class="ghost" id="eClose">Close</button>
+</dialog>
+
+<dialog id="ldlg"><img id="lImg" alt="Full size image"></dialog>
 
 <dialog id="sdlg">
   <h3>Server settings</h3>
@@ -239,6 +307,11 @@ import {getFirestore,collection,addDoc,setDoc,getDoc,getDocs,updateDoc,arrayUnio
 // (bottom of its sidebar), and paste it here. Leave "" to hide the "Join the official blah server" button.
 const OFFICIAL_SERVER = "";
 
+// Voice: STUN helps most home connections find each other. Strict networks (some school/work/mobile data)
+// also need a TURN relay. If your friends can't hear each other, add one here, e.g.
+// {urls: "turn:YOUR_HOST:3478", username: "...", credential: "..."}
+const ICE_SERVERS = [{urls: "stun:stun.l.google.com:19302"}, {urls: "stun:stun1.l.google.com:19302"}];
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -248,14 +321,17 @@ let user = null, me = "";
 let servers = [], dms = [], chans = [];
 let view = null;                       // {kind:"home"} | {kind:"dm", id} | {kind:"server", sid, cid}
 let unsubs = [], unsubChans = null, unsubMsgs = null, curPath = null;
-let profiles = {}, lastDocs = [], firstLoad = true;
+let profiles = {}, lastDocs = [], firstLoad = true, emojis = {};
+let voice = null, vparts = {}, vunsubs = [], speakingNow = new Set(), staleTimer = 0;
 const watching = new Set();
 
 const color = s => { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) % 360; return `hsl(${h} 55% 48%)`; };
 const initials = n => (n || "?").trim().slice(0, 2).toUpperCase();
 const slug = s => (s || "").toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 30);
 const code = () => Array.from(crypto.getRandomValues(new Uint8Array(6)), b => "abcdefghjkmnpqrstuvwxyz23456789"[b % 31]).join("");
-const dmName = d => (d.names && d.names[d.members.find(m => m !== user.uid)]) || "unknown";
+// username = login identity (never changes); display name = what people see (editable, optional)
+const shown = (uid, fallback) => (profiles[uid] && profiles[uid].displayName) || fallback;
+const dmName = d => { const o = d.members.find(m => m !== user.uid); return shown(o, (d.names && d.names[o]) || "unknown"); };
 const fail = err => {
   const box = $("msgs"); box.innerHTML = "";
   const d = document.createElement("div"); d.className = "empty";
@@ -297,7 +373,7 @@ function refresh() {
   if (raf) return;
   raf = requestAnimationFrame(() => { raf = 0; if (!user) return; updateMe(); renderSide(); renderMsgs(false); });
 }
-function updateMe() { paint($("meAv"), profiles[user.uid], me, user.uid); }
+function updateMe() { const n = shown(user.uid, me); $("meNm").textContent = n; paint($("meAv"), profiles[user.uid], n, user.uid); }
 // Crops + shrinks to w x h (JPEG). GIFs are kept as-is (animated) when anim is true and the file is small enough.
 function prepImage(file, w = 128, h = w, anim = true) {
   return new Promise((res, rej) => {
@@ -364,11 +440,12 @@ $("signup").onsubmit = async e => {
   try {
     const {user: u} = await createUserWithEmailAndPassword(auth, toEmail(n), pw);
     try { await updateProfile(u, {displayName: n}); } catch {}
+    try { await setDoc(doc(db, "users", u.uid), {name: n, nameLower: n.toLowerCase(), displayName: $("upDisp").value.trim().slice(0, 32)}, {merge: true}); } catch {}
     creating = false;
     start(auth.currentUser);
   } catch (err) { creating = false; showErr("err2", err); }
 };
-$("out").onclick = () => signOut(auth);
+$("out").onclick = async () => { await leaveVoice(); signOut(auth); };
 onAuthStateChanged(auth, u => { if (creating) return; u ? start(u) : stop(); });
 
 function start(u) {
@@ -389,9 +466,15 @@ function start(u) {
     dms = snap.docs.map(d => ({id: d.id, ...d.data()}));
     renderSide();
   }, fail));
+  unsubs.push(onSnapshot(query(collection(db, "emojis"), orderBy("createdAt", "desc"), limit(300)), snap => {
+    emojis = {}; snap.forEach(d => { emojis[d.id] = d.data(); });
+    refresh(); renderEmojiGrid();
+  }, () => {}));
+  if (!staleTimer) staleTimer = setInterval(() => { if (view && view.kind === "server") renderSide(); }, 30000);
   go({kind: "home"});
 }
 function stop() {
+  leaveVoice(); vunsubs.forEach(f => f()); vunsubs = []; clearInterval(staleTimer); staleTimer = 0;
   unsubs.forEach(f => f()); unsubs = []; watching.clear(); profiles = {};
   unsubChans && unsubChans(); unsubMsgs && unsubMsgs(); unsubChans = unsubMsgs = null;
   user = null; view = null; servers = []; dms = []; chans = []; curPath = null;
@@ -402,12 +485,22 @@ function stop() {
 /* ---------- navigation ---------- */
 function go(v) {
   view = v; chans = [];
+  vunsubs.forEach(f => f()); vunsubs = []; vparts = {};
   unsubChans && unsubChans(); unsubChans = null;
   if (v.kind === "server") {
     unsubChans = onSnapshot(query(collection(db, "servers", v.sid, "channels"), orderBy("createdAt")), snap => {
       if (view !== v) return;
       chans = snap.docs.map(d => ({id: d.id, ...d.data()}));
-      if (!v.cid && chans.length) { v.cid = chans[0].id; openMsgs(); }
+      const firstText = chans.find(c => c.type !== "voice");
+      if (!v.cid && firstText) { v.cid = firstText.id; openMsgs(); }
+      v.vw = v.vw || new Set();
+      chans.filter(c => c.type === "voice" && !v.vw.has(c.id)).forEach(c => {
+        v.vw.add(c.id);
+        vunsubs.push(onSnapshot(collection(db, "servers", v.sid, "channels", c.id, "voice"), s2 => {
+          vparts[c.id] = s2.docs.map(d => d.data({serverTimestamps: "estimate"}));
+          if (view === v) renderSide();
+        }, () => {}));
+      });
       renderSide();
     }, fail);
   }
@@ -432,7 +525,7 @@ function linkTitle() {
     const d = dms.find(x => x.id === view.id);
     if (d) {
       const o = d.members.find(m => m !== user.uid), n = dmName(d);
-      t.textContent = "@ " + n; t.className = "click"; t.title = "View profile"; t.onclick = () => openProfile(o, n); return;
+      t.textContent = "@ " + n; t.className = "click"; t.title = "View profile"; t.onclick = () => openProfile(o, (d.names && d.names[o]) || n); return;
     }
   }
   t.className = ""; t.title = ""; t.onclick = null;
@@ -453,7 +546,23 @@ function renderSide() {
     $("sideTitle").textContent = s ? s.name : "…";
     $("srvSet").hidden = !(s && s.ownerId === user.uid);
     $("listLabel").textContent = "Channels"; $("addCh").title = $("addCh").ariaLabel = "New channel";
-    chans.forEach(c => item("# " + c.name, c.id === view.cid, () => { view.cid = c.id; renderSide(); openMsgs(); }));
+    chans.forEach(c => {
+      if (c.type === "voice") {
+        item("🔊 " + c.name, !!voice && voice.sid === view.sid && voice.cid === c.id, () => joinVoice(view.sid, c.id, c.name));
+        const here = (vparts[c.id] || []).filter(fresh);
+        if (here.length) {
+          const sub = document.createElement("ul"); sub.className = "vps";
+          for (const q of here) {
+            const li = document.createElement("li"); li.className = "vp"; li.dataset.uid = q.uid;
+            if (speakingNow.has(q.uid)) li.classList.add("speaking");
+            const nm = shown(q.uid, q.name);
+            li.append(av(q.uid, nm, "sm"), document.createTextNode(nm + (q.muted ? " 🔇" : "")));
+            sub.append(li);
+          }
+          ul.lastElementChild.append(sub);
+        }
+      } else item("# " + c.name, c.id === view.cid, () => { view.cid = c.id; renderSide(); openMsgs(); });
+    });
     $("inv").hidden = false; $("copyInv").textContent = view.sid;
   } else {
     $("sideTitle").textContent = "Direct messages"; $("srvSet").hidden = true;
@@ -502,15 +611,9 @@ $("copyInv").onclick = async () => {
   catch { prompt("Invite code", view.sid); }
 };
 
-async function newChannel() {
-  const name = slug(prompt("New channel name")); if (!name) return;
-  try {
-    await setDoc(doc(db, "servers", view.sid, "channels", name), {name, createdAt: serverTimestamp()});
-    view.cid = name; renderSide(); openMsgs();
-  } catch (err) { alert(err.message); }
-}
+function newChannel() { $("cErr").textContent = ""; $("cName").value = ""; $("cdlg").showModal(); }
 async function newDM() {
-  const raw = (prompt("Username to message") || "").trim().toLowerCase(); if (!raw) return;
+  const raw = (prompt("Their username (not display name)") || "").trim().toLowerCase(); if (!raw) return;
   try {
     const snap = await getDocs(query(collection(db, "users"), where("nameLower", "==", raw), limit(1)));
     if (snap.empty) return alert("No one named “" + raw + "” yet. They need to log in to blah once.");
@@ -541,7 +644,7 @@ function openMsgs() {
   }
   $("chTitle").textContent = curPath ? title : "blah";
   linkTitle();
-  $("txt").disabled = !curPath;
+  $("txt").disabled = !curPath; $("attach").disabled = !curPath;
   $("txt").placeholder = curPath ? "Message " + title : "Nothing open yet";
   if (!curPath) {
     box.innerHTML = "";
@@ -558,7 +661,7 @@ function openMsgs() {
     }
     box.append(d); return;
   }
-  const q = query(collection(db, ...curPath), orderBy("createdAt", "desc"), limit(100));
+  const q = query(collection(db, ...curPath), orderBy("createdAt", "desc"), limit(60));
   unsubMsgs = onSnapshot(q, snap => {
     lastDocs = snap.docs.map(d => ({id: d.id, ...d.data({serverTimestamps: "estimate"}), pending: d.metadata.hasPendingWrites})).reverse();
     renderMsgs(true);
@@ -583,23 +686,30 @@ function renderMsgs(fromSnap) {
     if (joined) {
       const g = document.createElement("div"); g.className = "gut"; g.textContent = time; row.append(g);
     } else {
-      const a = av(m.uid, m.name, "click"); a.onclick = () => openProfile(m.uid, m.name); row.append(a);
+      const a = av(m.uid, shown(m.uid, m.name), "click"); a.onclick = () => openProfile(m.uid, m.name); row.append(a);
     }
     const c = document.createElement("div");
     if (!joined) {
       const h = document.createElement("div");
-      const w = document.createElement("span"); w.className = "who click"; w.textContent = m.name; w.style.color = color(m.uid);
+      const w = document.createElement("span"); w.className = "who click"; w.textContent = shown(m.uid, m.name); w.style.color = color(m.uid);
       w.onclick = () => openProfile(m.uid, m.name);
       const s = document.createElement("span"); s.className = "when"; s.textContent = t.toLocaleDateString([], {month: "short", day: "numeric"}) + ", " + time;
       h.append(w, s); c.append(h);
     }
-    const b = document.createElement("div"); b.className = "body"; b.textContent = m.text; c.append(b);
+    if (m.text) { const b = document.createElement("div"); b.className = "body"; b.append(richText(m.text)); c.append(b); }
+    if (isImg(m.image)) {
+      const im = document.createElement("img"); im.className = "pic"; im.alt = "Image from " + shown(m.uid, m.name);
+      if (m.w > 0 && m.h > 0) { im.width = m.w; im.height = m.h; }
+      im.src = m.image; im.onclick = () => { $("lImg").src = m.image; $("ldlg").showModal(); };
+      c.append(im);
+    }
     const rx = document.createElement("div"); rx.className = "rx";
-    for (const k of Object.keys(EMOJI)) {
-      const who = (m.reactions && m.reactions[k]) || [];
-      if (!who.length) continue;
+    const rkeys = Object.keys(m.reactions || {}).sort((a, b) => (a in EMOJI ? 0 : 1) - (b in EMOJI ? 0 : 1));
+    for (const k of rkeys) {
+      const who = m.reactions[k] || [], node = reactionNode(k);
+      if (!who.length || !node) continue;
       const b = document.createElement("button"); b.type = "button";
-      b.className = who.includes(user.uid) ? "me" : ""; b.textContent = EMOJI[k] + " " + who.length;
+      b.className = who.includes(user.uid) ? "me" : ""; b.append(node, document.createTextNode(" " + who.length));
       b.onclick = () => react(path, m, k); rx.append(b);
     }
     if (rx.children.length) c.append(rx);
@@ -613,6 +723,10 @@ function renderMsgs(fromSnap) {
         for (const k of Object.keys(EMOJI)) {
           const e = document.createElement("button"); e.type = "button"; e.textContent = EMOJI[k];
           e.onclick = () => react(path, m, k); pk.append(e);
+        }
+        for (const nm of Object.keys(emojis).sort()) {
+          const e = document.createElement("button"); e.type = "button"; e.title = ":" + nm + ":"; e.append(emojiImg(nm, false));
+          e.onclick = () => react(path, m, "e_" + nm); pk.append(e);
         }
         acts.prepend(pk);
       };
@@ -640,19 +754,308 @@ function renderMsgs(fromSnap) {
   if (fromSnap) firstLoad = false;
 }
 
+// Shrinks a picture to fit inside max px and re-encodes it small enough to live in a Firestore document.
+// GIFs are kept as-is (still animated) when under 600 KB.
+function shrink(file, max = 800) {
+  return new Promise((res, rej) => {
+    if (!file || !file.type.startsWith("image/")) return rej(new Error("That isn't an image."));
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("Couldn't read that image.")); };
+    img.onload = () => {
+      const W = img.naturalWidth, H = img.naturalHeight;
+      if (!W || !H) { URL.revokeObjectURL(url); return rej(new Error("Couldn't read that image.")); }
+      if (file.type === "image/gif") {
+        URL.revokeObjectURL(url);
+        if (file.size > 600000) return rej(new Error("That GIF is over 600 KB. Try a smaller one."));
+        const r = new FileReader(); r.onload = () => res({data: r.result, w: W, h: H}); r.onerror = () => rej(new Error("Couldn't read that file.")); r.readAsDataURL(file); return;
+      }
+      const k = Math.min(1, max / Math.max(W, H)), w = Math.round(W * k), h = Math.round(H * k);
+      const c = document.createElement("canvas"); c.width = w; c.height = h;
+      const g = c.getContext("2d"); g.fillStyle = "#2c2d32"; g.fillRect(0, 0, w, h); g.drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url); res({data: c.toDataURL("image/jpeg", 0.72), w, h});
+    };
+    img.src = url;
+  });
+}
+
+let attach = null;
+function showPrev() { $("prev").hidden = !attach; if (attach) $("pvImg").src = attach.data; }
+async function setAttach(file) {
+  try { attach = await shrink(file); showPrev(); $("txt").focus(); } catch (err) { alert(err.message); }
+}
+$("attach").onclick = () => $("imgFile").click();
+$("imgFile").onchange = e => { const f = e.target.files[0]; e.target.value = ""; if (f) setAttach(f); };
+$("pvX").onclick = () => { attach = null; showPrev(); };
+$("ldlg").onclick = () => $("ldlg").close();
+$("txt").addEventListener("paste", e => {
+  const it = [...(e.clipboardData ? e.clipboardData.items : [])].find(i => i.type.startsWith("image/"));
+  if (it) { e.preventDefault(); setAttach(it.getAsFile()); }
+});
+$("main").addEventListener("dragover", e => e.preventDefault());
+$("main").addEventListener("drop", e => {
+  const f = e.dataTransfer && e.dataTransfer.files[0];
+  if (f && curPath) { e.preventDefault(); setAttach(f); }
+});
+
 $("f").onsubmit = async e => {
   e.preventDefault();
-  const text = $("txt").value.trim();
-  if (!text || !user || !curPath) return;
-  $("txt").value = "";
+  const text = $("txt").value.trim(), img = attach;
+  if ((!text && !img) || !user || !curPath) return;
+  $("txt").value = ""; attach = null; showPrev();
+  const msg = {text, uid: user.uid, name: me, createdAt: serverTimestamp()};
+  if (img) Object.assign(msg, {image: img.data, w: img.w, h: img.h});
   try {
-    await addDoc(collection(db, ...curPath), {text, uid: user.uid, name: me, createdAt: serverTimestamp()});
+    await addDoc(collection(db, ...curPath), msg);
     const box = $("msgs"); box.scrollTop = box.scrollHeight;
-  } catch (err) { alert("Send failed: " + err.message); $("txt").value = text; }
+  } catch (err) { alert("Send failed: " + err.message); $("txt").value = text; attach = img; showPrev(); }
 };
+/* ---------- custom emojis ---------- */
+function emojiImg(name, big) {
+  const i = document.createElement("img"); i.className = "emoji" + (big ? " big" : "");
+  i.src = emojis[name].image; i.alt = i.title = ":" + name + ":"; return i;
+}
+function reactionNode(k) {
+  if (EMOJI[k]) return document.createTextNode(EMOJI[k]);
+  const nm = k.startsWith("e_") ? k.slice(2) : "";
+  return emojis[nm] && isImg(emojis[nm].image) ? emojiImg(nm, false) : null;
+}
+// turns :name: into the matching custom emoji; a message made only of emojis gets shown big
+function richText(text) {
+  const re = /:([a-z0-9_]{2,24}):/g, parts = [];
+  let last = 0, m;
+  while ((m = re.exec(text))) {
+    if (emojis[m[1]] && isImg(emojis[m[1]].image)) { parts.push({t: text.slice(last, m.index)}, {e: m[1]}); last = re.lastIndex; }
+  }
+  parts.push({t: text.slice(last)});
+  const n = parts.filter(x => x.e).length, big = n > 0 && n <= 6 && !parts.some(x => x.t && x.t.trim());
+  const frag = document.createDocumentFragment();
+  for (const x of parts) { if (x.e) frag.append(emojiImg(x.e, big)); else if (x.t) frag.append(document.createTextNode(x.t)); }
+  return frag;
+}
+function prepEmoji(file) {
+  return new Promise((res, rej) => {
+    if (!file || !file.type.startsWith("image/")) return rej(new Error("That isn't an image."));
+    if (file.type === "image/gif") {
+      if (file.size > 100000) return rej(new Error("That GIF is over 100 KB. Try a smaller one."));
+      const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(new Error("Couldn't read that file.")); r.readAsDataURL(file); return;
+    }
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("Couldn't read that image.")); };
+    img.onload = () => {
+      const W = img.naturalWidth, H = img.naturalHeight;
+      if (!W || !H) { URL.revokeObjectURL(url); return rej(new Error("Couldn't read that image.")); }
+      const k = Math.min(64 / W, 64 / H), w = Math.max(1, Math.round(W * k)), h = Math.max(1, Math.round(H * k));
+      const c = document.createElement("canvas"); c.width = c.height = 64;
+      c.getContext("2d").drawImage(img, (64 - w) / 2, (64 - h) / 2, w, h);
+      URL.revokeObjectURL(url); res(c.toDataURL("image/png"));
+    };
+    img.src = url;
+  });
+}
+
+let eData = "";
+function renderEmojiGrid() {
+  const g = $("eGrid"); if (!g) return; g.innerHTML = "";
+  const names = Object.keys(emojis).sort();
+  if (!names.length) { const d = document.createElement("div"); d.className = "small"; d.textContent = "No custom emojis yet. Add the first one!"; g.append(d); return; }
+  for (const nm of names) {
+    if (!isImg(emojis[nm].image)) continue;
+    const b = document.createElement("button"); b.type = "button"; b.className = "eitem"; b.title = ":" + nm + ":" + (emojis[nm].by ? " by " + emojis[nm].by : "");
+    const s = document.createElement("span"); s.textContent = nm; b.append(emojiImg(nm, false), s);
+    b.onclick = () => pickEmoji(nm);
+    if (emojis[nm].uid === user.uid) {
+      const x = document.createElement("button"); x.type = "button"; x.className = "x"; x.textContent = "✕"; x.setAttribute("aria-label", "Delete :" + nm + ":");
+      x.onclick = async ev => {
+        ev.stopPropagation();
+        if (!confirm("Delete :" + nm + ":? Messages using it will show the plain text.")) return;
+        try { await deleteDoc(doc(db, "emojis", nm)); } catch (err) { $("eErr").textContent = err.message; }
+      };
+      b.append(x);
+    }
+    g.append(b);
+  }
+}
+async function pickEmoji(name) {
+  const t = ":" + name + ":", i = $("txt");
+  if (!i.disabled) {
+    const s = i.selectionStart ?? i.value.length, en = i.selectionEnd ?? s;
+    i.value = i.value.slice(0, s) + t + " " + i.value.slice(en);
+    $("edlg").close(); i.focus(); i.selectionStart = i.selectionEnd = s + t.length + 1;
+  } else {
+    try { await navigator.clipboard.writeText(t); $("eMsg").textContent = "Copied " + t + ". Paste it into any message."; }
+    catch { $("eMsg").textContent = "Type " + t + " in a message to use it."; }
+  }
+}
+const openEmojis = () => { $("eErr").textContent = ""; renderEmojiGrid(); $("edlg").showModal(); };
+$("emojiBtn").onclick = $("emBtn").onclick = openEmojis;
+$("eClose").onclick = () => $("edlg").close();
+$("ePick").onclick = () => $("eFile").click();
+$("eFile").onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  try {
+    eData = await prepEmoji(f); $("ePv").src = eData; $("ePv").hidden = false; $("eErr").textContent = "";
+    if (!$("eName").value.trim()) $("eName").value = f.name.replace(/\.[^.]*$/, "").toLowerCase().replace(/[^a-z0-9_]+/g, "_").replace(/^_+|_+$/g, "").slice(0, 24);
+  } catch (err) { eData = ""; $("ePv").hidden = true; $("eErr").textContent = err.message; }
+};
+$("ef").onsubmit = async e => {
+  e.preventDefault();
+  const name = $("eName").value.trim().toLowerCase();
+  if (!/^[a-z0-9_]{2,24}$/.test(name)) return $("eErr").textContent = "Name: 2–24 letters, numbers or underscores.";
+  if (!eData) return $("eErr").textContent = "Choose an image first.";
+  if (emojis[name]) return $("eErr").textContent = "That name is taken. Try another.";
+  try {
+    await setDoc(doc(db, "emojis", name), {name, image: eData, uid: user.uid, by: me, createdAt: serverTimestamp()});
+    eData = ""; $("eName").value = ""; $("ePv").hidden = true; $("eErr").textContent = "";
+    $("eMsg").textContent = "Added :" + name + ":";
+  } catch (err) { $("eErr").textContent = err.code === "permission-denied" ? "Couldn't save. The name may be taken, or the Firestore rules need updating." : err.message; }
+};
+
+/* ---------- voice channels (WebRTC, signaled through Firestore) ---------- */
+const fresh = d => { const s = d.seen && d.seen.toMillis ? d.seen.toMillis() : Date.now(); return Date.now() - s < 70000; };
+let actx = null, lvlTimer = 0; const levels = {};
+
+function setSpeaking(uid, on) { document.querySelectorAll('.vp[data-uid="' + uid + '"]').forEach(e => e.classList.toggle("speaking", on)); }
+function watchLevel(stream, uid) {
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === "suspended") actx.resume();
+    const an = actx.createAnalyser(); an.fftSize = 512;
+    actx.createMediaStreamSource(stream).connect(an);
+    levels[uid] = {an, buf: new Uint8Array(an.fftSize)};
+  } catch {}
+}
+function levelTick() {
+  for (const uid of Object.keys(levels)) {
+    const L = levels[uid]; L.an.getByteTimeDomainData(L.buf);
+    let s = 0; for (const x of L.buf) { const d = (x - 128) / 128; s += d * d; }
+    const on = Math.sqrt(s / L.buf.length) > 0.03 && !(voice && uid === user.uid && voice.muted);
+    if (on !== speakingNow.has(uid)) { on ? speakingNow.add(uid) : speakingNow.delete(uid); setSpeaking(uid, on); }
+  }
+}
+
+function showVoiceBar() {
+  const v = voice; $("vbar").hidden = !v; if (!v) return;
+  $("vTitle").textContent = "🔊 " + v.cname; $("vMute").textContent = v.muted ? "Unmute" : "Mute";
+}
+const sendSignal = (v, to, type, data) =>
+  addDoc(collection(db, ...v.base, to, "signals"), {from: user.uid, to, type, data: JSON.stringify(data), ts: serverTimestamp()}).catch(() => {});
+
+async function joinVoice(sid, cid, cname) {
+  if (voice) { if (voice.sid === sid && voice.cid === cid) return; await leaveVoice(); }
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return alert("Voice needs a secure (https) page and a browser that supports microphones.");
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: true, noiseSuppression: true, autoGainControl: true}}); }
+  catch (err) { return alert("Couldn't use your microphone: " + err.message); }
+  const base = ["servers", sid, "channels", cid, "voice"];
+  const v = voice = {sid, cid, cname, base, stream, pcs: {}, peers: [], muted: false};
+  try {
+    // clear leftovers from an earlier session, listen for signals, and only then announce ourselves
+    const old = await getDocs(collection(db, ...base, user.uid, "signals"));
+    await Promise.all(old.docs.map(d => deleteDoc(d.ref).catch(() => {})));
+    v.unsubSig = onSnapshot(query(collection(db, ...base, user.uid, "signals"), orderBy("ts")), snap => {
+      const adds = snap.docChanges().filter(c => c.type === "added").map(c => c.doc);
+      v.chain = (v.chain || Promise.resolve()).then(async () => {
+        for (const d of adds) { try { await handleSignal(v, d.data()); } catch (e) { console.warn(e); } deleteDoc(d.ref).catch(() => {}); }
+      });
+    });
+    await setDoc(doc(db, ...base, user.uid), {uid: user.uid, name: me, muted: false, joinedAt: serverTimestamp(), seen: serverTimestamp()});
+  } catch (err) {
+    v.unsubSig && v.unsubSig(); stream.getTracks().forEach(t => t.stop()); voice = null;
+    return alert("Couldn't join voice: " + err.message + " (check your Firestore rules)");
+  }
+  v.hb = setInterval(() => { updateDoc(doc(db, ...base, user.uid), {seen: serverTimestamp()}).catch(() => {}); syncPeers(); }, 25000);
+  v.unsubPeers = onSnapshot(collection(db, ...base), snap => {
+    v.peers = snap.docs.map(d => d.data({serverTimestamps: "estimate"})); syncPeers(); renderSide();
+  });
+  watchLevel(stream, user.uid); lvlTimer = setInterval(levelTick, 120);
+  $("vStatus").textContent = ""; showVoiceBar(); renderSide();
+}
+
+// the person with the larger uid always makes the offer, so two people never offer at the same time
+function syncPeers() {
+  const v = voice; if (!v) return;
+  const ids = new Set(v.peers.filter(fresh).map(q => q.uid).filter(u => u !== user.uid));
+  for (const uid of ids) if (!v.pcs[uid] && user.uid > uid) makePeer(v, uid, true).catch(() => {});
+  for (const uid of Object.keys(v.pcs)) if (!ids.has(uid)) closePeer(v, uid);
+}
+async function makePeer(v, uid, offerer) {
+  const pc = new RTCPeerConnection({iceServers: ICE_SERVERS});
+  const audio = document.createElement("audio"); audio.autoplay = true; audio.setAttribute("playsinline", ""); $("vaudio").append(audio);
+  const peer = v.pcs[uid] = {pc, audio, pending: []};
+  v.stream.getTracks().forEach(t => pc.addTrack(t, v.stream));
+  pc.ontrack = e => { audio.srcObject = e.streams[0]; audio.play().catch(() => {}); watchLevel(e.streams[0], uid); };
+  pc.onicecandidate = e => { if (e.candidate) sendSignal(v, uid, "ice", e.candidate.toJSON()); };
+  pc.onconnectionstatechange = () => {
+    if (pc.connectionState === "failed") $("vStatus").textContent = "⚠ Couldn't connect to someone. Their network may block voice calls.";
+    else if (pc.connectionState === "connected") $("vStatus").textContent = "";
+  };
+  if (offerer) {
+    const offer = await pc.createOffer(); await pc.setLocalDescription(offer);
+    sendSignal(v, uid, "offer", {type: offer.type, sdp: offer.sdp});
+  }
+  return peer;
+}
+function closePeer(v, uid) {
+  const peer = v.pcs[uid]; if (!peer) return;
+  try { peer.pc.close(); } catch {}
+  peer.audio.srcObject = null; peer.audio.remove(); delete v.pcs[uid];
+  delete levels[uid]; speakingNow.delete(uid); setSpeaking(uid, false);
+}
+async function drainIce(peer) {
+  for (const c of peer.pending.splice(0)) { try { await peer.pc.addIceCandidate(c); } catch {} }
+}
+async function handleSignal(v, s) {
+  if (voice !== v) return;
+  const data = JSON.parse(s.data);
+  if (s.type === "offer") {
+    if (v.pcs[s.from]) closePeer(v, s.from);
+    const peer = await makePeer(v, s.from, false);
+    await peer.pc.setRemoteDescription(data); await drainIce(peer);
+    const ans = await peer.pc.createAnswer(); await peer.pc.setLocalDescription(ans);
+    sendSignal(v, s.from, "answer", {type: ans.type, sdp: ans.sdp});
+  } else if (s.type === "answer") {
+    const peer = v.pcs[s.from]; if (!peer) return;
+    await peer.pc.setRemoteDescription(data); await drainIce(peer);
+  } else if (s.type === "ice") {
+    const peer = v.pcs[s.from]; if (!peer) return;
+    if (peer.pc.remoteDescription) { try { await peer.pc.addIceCandidate(data); } catch {} } else peer.pending.push(data);
+  }
+}
+async function leaveVoice() {
+  const v = voice; if (!v) return; voice = null;
+  clearInterval(v.hb); clearInterval(lvlTimer); lvlTimer = 0;
+  v.unsubPeers && v.unsubPeers(); v.unsubSig && v.unsubSig();
+  Object.keys(v.pcs).forEach(uid => closePeer(v, uid));
+  v.stream.getTracks().forEach(t => t.stop());
+  delete levels[user.uid]; speakingNow.clear();
+  showVoiceBar(); renderSide();
+  try { await deleteDoc(doc(db, ...v.base, user.uid)); } catch {}
+}
+$("vLeave").onclick = () => leaveVoice();
+$("vMute").onclick = () => {
+  const v = voice; if (!v) return;
+  v.muted = !v.muted; v.stream.getAudioTracks().forEach(t => { t.enabled = !v.muted; });
+  showVoiceBar(); updateDoc(doc(db, ...v.base, user.uid), {muted: v.muted}).catch(() => {});
+};
+addEventListener("pagehide", () => { if (voice && user) deleteDoc(doc(db, ...voice.base, user.uid)).catch(() => {}); });
+
+// new channel dialog (text or voice)
+$("cClose").onclick = () => $("cdlg").close();
+$("cf").onsubmit = async e => {
+  e.preventDefault();
+  const name = slug($("cName").value), type = document.querySelector('input[name="ctype"]:checked').value;
+  if (!name) return $("cErr").textContent = "Give the channel a name.";
+  if (chans.some(c => c.id === name)) return $("cErr").textContent = "A channel with that name already exists.";
+  try {
+    await setDoc(doc(db, "servers", view.sid, "channels", name), {name, type, createdAt: serverTimestamp()});
+    $("cdlg").close();
+    if (type === "text") { view.cid = name; renderSide(); openMsgs(); }
+  } catch (err) { $("cErr").textContent = err.message; }
+};
+
 /* ---------- profile dialog ---------- */
 const COLORS = ["#ee3f65", "#f59e0b", "#22c55e", "#14b8a6", "#3b82f6", "#8b5cf6", "#ec4899", "#64748b"];
-let draft = {}, pUid = null, sdraft = {};
+let draft = {}, pUid = null, pUname = "", sdraft = {};
 COLORS.forEach(c => {
   const b = document.createElement("button"); b.type = "button"; b.style.background = c; b.dataset.c = c; b.setAttribute("aria-label", "Color " + c);
   b.onclick = () => { draft.color = draft.color === c ? "" : c; drawProfile(); };
@@ -665,8 +1068,9 @@ function drawProfile() {
 function openProfile(uid, name) {
   pUid = uid; watchProfile(uid);
   const pr = profiles[uid] || {}, mine = uid === user.uid;
+  pUname = pr.name || name;
   draft = {photo: pr.photo || "", color: pr.color || "", banner: pr.banner || ""};
-  $("pName").textContent = name;
+  $("pName").textContent = pr.displayName || pUname; $("pUser").textContent = "@" + pUname; $("pDisp").value = pr.displayName || "";
   $("pBio").textContent = mine ? "" : (pr.bio || "No bio yet.");
   $("pBioIn").value = pr.bio || "";
   $("pEdit").hidden = !mine; $("pDm").hidden = mine; $("pErr").textContent = "";
@@ -674,6 +1078,7 @@ function openProfile(uid, name) {
 }
 $("meAv").onclick = $("meNm").onclick = () => openProfile(user.uid, me);
 $("pClose").onclick = () => $("pdlg").close();
+$("pDisp").oninput = () => { $("pName").textContent = $("pDisp").value.trim() || pUname; drawProfile(); };
 $("pPick").onclick = () => $("pFile").click();
 $("pClear").onclick = () => { draft.photo = ""; drawProfile(); };
 $("pFile").onchange = async e => {
@@ -682,12 +1087,12 @@ $("pFile").onchange = async e => {
 };
 $("pSave").onclick = async () => {
   try {
-    await setDoc(doc(db, "users", user.uid), {photo: draft.photo, color: draft.color, banner: draft.banner, bio: $("pBioIn").value.trim().slice(0, 120)}, {merge: true});
+    await setDoc(doc(db, "users", user.uid), {displayName: $("pDisp").value.trim().slice(0, 32), photo: draft.photo, color: draft.color, banner: draft.banner, bio: $("pBioIn").value.trim().slice(0, 120)}, {merge: true});
     $("pdlg").close();
   } catch (err) { $("pErr").textContent = err.message; }
 };
 $("pDm").onclick = async () => {
-  try { $("pdlg").close(); await openDM(pUid, $("pName").textContent); $("nav").classList.remove("open"); } catch (err) { alert(err.message); }
+  try { $("pdlg").close(); await openDM(pUid, pUname); $("nav").classList.remove("open"); } catch (err) { alert(err.message); }
 };
 $("pBanPick").onclick = () => $("pBanFile").click();
 $("pBanClear").onclick = () => { draft.banner = ""; drawProfile(); };
@@ -728,14 +1133,25 @@ service cloud.firestore {
     function signedIn() { return request.auth != null; }
     function inServer(s) { return signedIn() && request.auth.uid in get(/databases/$(database)/documents/servers/$(s)).data.members; }
     function inDm(d) { return signedIn() && request.auth.uid in get(/databases/$(database)/documents/dms/$(d)).data.members; }
-    function okMsg() { return request.resource.data.uid == request.auth.uid && request.resource.data.text is string && request.resource.data.text.size() <= 2000; }
+    function okMsg() { return request.resource.data.uid == request.auth.uid && request.resource.data.text is string && request.resource.data.text.size() <= 2000
+      && (!('image' in request.resource.data) || (request.resource.data.image is string && request.resource.data.image.size() < 850000)); }
 
     match /users/{u} {
       allow read: if signedIn();
       allow write: if signedIn() && request.auth.uid == u
+        && request.resource.data.nameLower == request.auth.token.email.split('@')[0]
+        && (!('displayName' in request.resource.data) || request.resource.data.displayName.size() <= 32)
         && (!('photo' in request.resource.data) || request.resource.data.photo.size() < 600000)
         && (!('banner' in request.resource.data) || request.resource.data.banner.size() < 100000)
         && (!('bio' in request.resource.data) || request.resource.data.bio.size() <= 120);
+    }
+
+    match /emojis/{n} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid
+        && n.matches('[a-z0-9_]{2,24}') && request.resource.data.name == n
+        && request.resource.data.image is string && request.resource.data.image.size() < 150000;
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
     }
 
     match /servers/{s} {
@@ -753,6 +1169,15 @@ service cloud.firestore {
         && (!('icon' in request.resource.data) || request.resource.data.icon.size() < 600000);
       match /channels/{c} {
         allow read, create: if inServer(s);
+        match /voice/{u} {
+          allow read: if inServer(s);
+          allow create, update: if inServer(s) && request.auth.uid == u && request.resource.data.uid == u;
+          allow delete: if signedIn() && request.auth.uid == u;
+          match /signals/{sg} {
+            allow create: if inServer(s) && request.resource.data.from == request.auth.uid;
+            allow read, delete: if signedIn() && request.auth.uid == u;
+          }
+        }
         match /messages/{m} {
           allow read: if inServer(s);
           allow create: if inServer(s) && okMsg();
