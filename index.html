@@ -148,6 +148,30 @@ dialog .ghost{margin-top:8px}
 .vp.speaking .av{box-shadow:0 0 0 2px #3ddc84}
 .opt{display:flex;align-items:center;gap:6px;cursor:pointer}
 #cdlg input[type=radio]{width:auto}
+#leaveSrv{color:#ff8a9d}
+#stage{flex:1;min-height:0;display:flex;flex-direction:column;overflow:auto}
+#shares{display:flex;flex-direction:column;gap:12px;padding:12px 16px}
+#shares:empty{display:none}
+.stile video{display:block;width:100%;max-height:52vh;background:#000;border-radius:10px;cursor:zoom-in}
+.scap{color:var(--mut);font-size:13px;margin-top:4px}
+.slocal{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg2);border-radius:10px}
+.slocal button{padding:5px 12px}
+#people{flex:1;display:flex;flex-wrap:wrap;gap:28px 32px;align-content:center;justify-content:center;padding:28px 16px}
+.pp{display:grid;justify-items:center;gap:10px;width:110px}
+.pwrap{position:relative;width:96px;height:96px}
+.pwrap .av{position:relative;z-index:1;width:96px;height:96px;font-size:34px}
+.rip{position:absolute;inset:0;border-radius:50%;border:2px solid #3ddc84;background:rgba(61,220,132,.2);opacity:0;pointer-events:none}
+.pp.speaking .rip{animation:rip 1.5s ease-out infinite}
+.pp.speaking .rip.r2{animation-delay:.5s}
+.pp.speaking .rip.r3{animation-delay:1s}
+@keyframes rip{0%{transform:scale(1);opacity:.75}100%{transform:scale(1.75);opacity:0}}
+@media(prefers-reduced-motion:reduce){.pp.speaking .rip{animation:none;opacity:.7}.pp.speaking .rip.r2,.pp.speaking .rip.r3{display:none}}
+.pn{font-weight:600;font-size:14px;text-align:center;overflow-wrap:anywhere}
+#sctl{display:flex;justify-content:center;align-items:center;gap:14px;padding:14px;border-top:1px solid var(--line);background:var(--bg2)}
+.rnd{width:52px;height:52px;border-radius:50%;padding:0;font-size:22px;background:var(--bg3);color:var(--txt)}
+.rnd.off{background:var(--err)}
+.rnd.on{background:var(--brand)}
+.pill{background:var(--err);border-radius:26px;padding:0 22px;height:52px}
 @media(max-width:700px){
  #app{grid-template-columns:1fr}
  #nav{position:fixed;inset:0 10% 0 0;z-index:5;transform:translateX(-100%);transition:transform .2s;box-shadow:4px 0 24px #0008}
@@ -197,15 +221,24 @@ dialog .ghost{margin-top:8px}
       <div id="sideHead"><h2 id="sideTitle">Direct messages</h2><button id="srvSet" class="ghost" hidden title="Server settings" aria-label="Server settings">⚙</button></div>
       <div class="sec"><span id="listLabel">People</span><button id="addCh" class="ghost" title="New" aria-label="New">+</button></div>
       <ul id="chs"></ul>
-      <div id="inv" hidden>Invite code: <button type="button" class="link" id="copyInv"></button></div>
+      <div id="inv" hidden>Invite code: <button type="button" class="link" id="copyInv"></button> · <button type="button" class="link" id="leaveSrv">Leave server</button></div>
       <div id="me"><div class="av" id="meAv" title="Edit profile"></div><span class="nm" id="meNm" title="Edit profile"></span><button id="out" class="ghost">Sign out</button></div>
     </aside>
   </div>
   <main id="main">
     <div id="top"><button id="menu" class="ghost" aria-label="Menu">☰</button><span id="chTitle">blah</span></div>
-    <div id="vbar" hidden><span id="vTitle"></span><span id="vStatus" class="small"></span>
+    <div id="vbar" hidden><button type="button" id="vTitle" class="link" title="Open voice room"></button><span id="vStatus" class="small"></span>
       <button type="button" id="vMute" class="outline">Mute</button><button type="button" id="vLeave">Leave</button></div>
     <div id="vaudio" hidden></div>
+    <div id="stage" hidden>
+      <div id="shares"></div>
+      <div id="people"></div>
+      <div id="sctl">
+        <button type="button" id="sMute" class="rnd" aria-label="Mute" title="Mute">🎤</button>
+        <button type="button" id="sShare" class="rnd" aria-label="Share screen" title="Share your screen">🖥️</button>
+        <button type="button" id="sLeave" class="pill">Leave</button>
+      </div>
+    </div>
     <div id="msgs" aria-live="polite"></div>
     <form id="f">
       <div id="prev" hidden><img id="pvImg" alt="Attached image preview"><button type="button" class="ghost" id="pvX">✕ Remove</button></div>
@@ -322,7 +355,7 @@ let servers = [], dms = [], chans = [];
 let view = null;                       // {kind:"home"} | {kind:"dm", id} | {kind:"server", sid, cid}
 let unsubs = [], unsubChans = null, unsubMsgs = null, curPath = null;
 let profiles = {}, lastDocs = [], firstLoad = true, emojis = {};
-let voice = null, vparts = {}, vunsubs = [], speakingNow = new Set(), staleTimer = 0;
+let voice = null, vparts = {}, vunsubs = [], speakingNow = new Set(), staleTimer = 0, stage = false;
 const watching = new Set();
 
 const color = s => { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) % 360; return `hsl(${h} 55% 48%)`; };
@@ -484,7 +517,7 @@ function stop() {
 
 /* ---------- navigation ---------- */
 function go(v) {
-  view = v; chans = [];
+  view = v; chans = []; stage = false;
   vunsubs.forEach(f => f()); vunsubs = []; vparts = {};
   unsubChans && unsubChans(); unsubChans = null;
   if (v.kind === "server") {
@@ -504,7 +537,7 @@ function go(v) {
       renderSide();
     }, fail);
   }
-  renderRail(); renderSide(); openMsgs();
+  renderRail(); renderSide(); openMsgs(); applyStage();
 }
 
 function renderRail() {
@@ -561,15 +594,16 @@ function renderSide() {
           }
           ul.lastElementChild.append(sub);
         }
-      } else item("# " + c.name, c.id === view.cid, () => { view.cid = c.id; renderSide(); openMsgs(); });
+      } else item("# " + c.name, c.id === view.cid, () => { stage = false; view.cid = c.id; renderSide(); openMsgs(); applyStage(); });
     });
-    $("inv").hidden = false; $("copyInv").textContent = view.sid;
+    $("inv").hidden = false; $("copyInv").textContent = view.sid; $("leaveSrv").hidden = !!(s && s.ownerId === user.uid);
   } else {
     $("sideTitle").textContent = "Direct messages"; $("srvSet").hidden = true;
     $("listLabel").textContent = "People"; $("addCh").title = $("addCh").ariaLabel = "New message";
     dms.forEach(d => { const o = d.members.find(m => m !== user.uid); item(dmName(d), view.kind === "dm" && view.id === d.id, () => go({kind: "dm", id: d.id}), av(o, dmName(d), "sm")); });
     $("inv").hidden = true;
   }
+  renderStage();
 }
 
 /* ---------- servers, channels, DMs ---------- */
@@ -914,7 +948,7 @@ $("ef").onsubmit = async e => {
 const fresh = d => { const s = d.seen && d.seen.toMillis ? d.seen.toMillis() : Date.now(); return Date.now() - s < 70000; };
 let actx = null, lvlTimer = 0; const levels = {};
 
-function setSpeaking(uid, on) { document.querySelectorAll('.vp[data-uid="' + uid + '"]').forEach(e => e.classList.toggle("speaking", on)); }
+function setSpeaking(uid, on) { document.querySelectorAll('.vp[data-uid="' + uid + '"], .pp[data-uid="' + uid + '"]').forEach(e => e.classList.toggle("speaking", on)); }
 function watchLevel(stream, uid) {
   try {
     actx = actx || new (window.AudioContext || window.webkitAudioContext)();
@@ -934,20 +968,22 @@ function levelTick() {
 }
 
 function showVoiceBar() {
-  const v = voice; $("vbar").hidden = !v; if (!v) return;
+  const v = voice; applyStage(); if (!v) return;
   $("vTitle").textContent = "🔊 " + v.cname; $("vMute").textContent = v.muted ? "Unmute" : "Mute";
+  $("sMute").textContent = v.muted ? "🔇" : "🎤"; $("sMute").classList.toggle("off", v.muted);
+  $("sShare").classList.toggle("on", !!v.screen);
 }
 const sendSignal = (v, to, type, data) =>
   addDoc(collection(db, ...v.base, to, "signals"), {from: user.uid, to, type, data: JSON.stringify(data), ts: serverTimestamp()}).catch(() => {});
 
 async function joinVoice(sid, cid, cname) {
-  if (voice) { if (voice.sid === sid && voice.cid === cid) return; await leaveVoice(); }
+  if (voice) { if (voice.sid === sid && voice.cid === cid) { stage = true; applyStage(); return; } await leaveVoice(); }
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return alert("Voice needs a secure (https) page and a browser that supports microphones.");
   let stream;
   try { stream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: true, noiseSuppression: true, autoGainControl: true}}); }
   catch (err) { return alert("Couldn't use your microphone: " + err.message); }
   const base = ["servers", sid, "channels", cid, "voice"];
-  const v = voice = {sid, cid, cname, base, stream, pcs: {}, peers: [], muted: false};
+  const v = voice = {sid, cid, cname, base, stream, pcs: {}, peers: [], muted: false, sin: {}, sout: {}};
   try {
     // clear leftovers from an earlier session, listen for signals, and only then announce ourselves
     const old = await getDocs(collection(db, ...base, user.uid, "signals"));
@@ -968,7 +1004,7 @@ async function joinVoice(sid, cid, cname) {
     v.peers = snap.docs.map(d => d.data({serverTimestamps: "estimate"})); syncPeers(); renderSide();
   });
   watchLevel(stream, user.uid); lvlTimer = setInterval(levelTick, 120);
-  $("vStatus").textContent = ""; showVoiceBar(); renderSide();
+  $("vStatus").textContent = ""; stage = true; showVoiceBar(); renderSide();
 }
 
 // the person with the larger uid always makes the offer, so two people never offer at the same time
@@ -977,6 +1013,9 @@ function syncPeers() {
   const ids = new Set(v.peers.filter(fresh).map(q => q.uid).filter(u => u !== user.uid));
   for (const uid of ids) if (!v.pcs[uid] && user.uid > uid) makePeer(v, uid, true).catch(() => {});
   for (const uid of Object.keys(v.pcs)) if (!ids.has(uid)) closePeer(v, uid);
+  if (v.screen) for (const uid of ids) if (!v.sout[uid]) sendScreenTo(v, uid).catch(() => {});
+  for (const uid of Object.keys(v.sout)) if (!ids.has(uid)) { try { v.sout[uid].pc.close(); } catch {} delete v.sout[uid]; }
+  for (const uid of Object.keys(v.sin)) if (!ids.has(uid)) closeScreenIn(v, uid);
 }
 async function makePeer(v, uid, offerer) {
   const pc = new RTCPeerConnection({iceServers: ICE_SERVERS});
@@ -1019,20 +1058,36 @@ async function handleSignal(v, s) {
   } else if (s.type === "ice") {
     const peer = v.pcs[s.from]; if (!peer) return;
     if (peer.pc.remoteDescription) { try { await peer.pc.addIceCandidate(data); } catch {} } else peer.pending.push(data);
-  }
+  } else if (s.type === "soffer") {              // someone is sharing their screen with us (its own connection, separate from voice)
+    closeScreenIn(v, s.from);
+    const pc = new RTCPeerConnection({iceServers: ICE_SERVERS}), en = v.sin[s.from] = {pc, pending: []};
+    pc.ontrack = e => addShareTile(s.from, e.streams[0], false);
+    pc.onicecandidate = e => { if (e.candidate) sendSignal(v, s.from, "sice", {dir: "toSharer", c: e.candidate.toJSON()}); };
+    await pc.setRemoteDescription(data); await drainIce(en);
+    const ans = await pc.createAnswer(); await pc.setLocalDescription(ans);
+    sendSignal(v, s.from, "sanswer", {type: ans.type, sdp: ans.sdp});
+  } else if (s.type === "sanswer") {
+    const en = v.sout[s.from]; if (!en) return;
+    await en.pc.setRemoteDescription(data); await drainIce(en);
+  } else if (s.type === "sice") {
+    const en = data.dir === "toViewer" ? v.sin[s.from] : v.sout[s.from]; if (!en) return;
+    if (en.pc.remoteDescription) { try { await en.pc.addIceCandidate(data.c); } catch {} } else en.pending.push(data.c);
+  } else if (s.type === "sstop") closeScreenIn(v, s.from);
 }
 async function leaveVoice() {
-  const v = voice; if (!v) return; voice = null;
+  if (!voice) return; stopShare();
+  const v = voice; voice = null; const wasStage = stage; stage = false;
   clearInterval(v.hb); clearInterval(lvlTimer); lvlTimer = 0;
   v.unsubPeers && v.unsubPeers(); v.unsubSig && v.unsubSig();
   Object.keys(v.pcs).forEach(uid => closePeer(v, uid));
   v.stream.getTracks().forEach(t => t.stop());
+  Object.keys(v.sin).forEach(uid => closeScreenIn(v, uid)); $("shares").innerHTML = "";
   delete levels[user.uid]; speakingNow.clear();
-  showVoiceBar(); renderSide();
+  showVoiceBar(); renderSide(); if (wasStage && view) openMsgs();
   try { await deleteDoc(doc(db, ...v.base, user.uid)); } catch {}
 }
-$("vLeave").onclick = () => leaveVoice();
-$("vMute").onclick = () => {
+$("vLeave").onclick = $("sLeave").onclick = () => leaveVoice();
+$("vMute").onclick = $("sMute").onclick = () => {
   const v = voice; if (!v) return;
   v.muted = !v.muted; v.stream.getAudioTracks().forEach(t => { t.enabled = !v.muted; });
   showVoiceBar(); updateDoc(doc(db, ...v.base, user.uid), {muted: v.muted}).catch(() => {});
@@ -1051,6 +1106,99 @@ $("cf").onsubmit = async e => {
     $("cdlg").close();
     if (type === "text") { view.cid = name; renderSide(); openMsgs(); }
   } catch (err) { $("cErr").textContent = err.message; }
+};
+
+/* ---------- voice room (stage), screen sharing, leaving servers ---------- */
+const stageOn = () => !!voice && stage && !!view && view.kind === "server" && view.sid === voice.sid;
+function applyStage() {
+  const on = stageOn();
+  $("stage").hidden = !on; $("msgs").hidden = on; $("f").hidden = on; $("vbar").hidden = !voice || on;
+  if (on) { const t = $("chTitle"); t.textContent = "🔊 " + voice.cname; t.className = ""; t.onclick = null; renderStage(); }
+}
+function renderStage() {
+  if (!stageOn()) return;
+  const box = $("people"); box.innerHTML = "";
+  const list = voice.peers.filter(fresh).sort((a, b) => (a.uid === user.uid ? -1 : b.uid === user.uid ? 1 : 0) || (a.name || "").localeCompare(b.name || ""));
+  for (const q of list) {
+    const nm = shown(q.uid, q.name);
+    const cell = document.createElement("div"); cell.className = "pp" + (speakingNow.has(q.uid) ? " speaking" : ""); cell.dataset.uid = q.uid;
+    const w = document.createElement("div"); w.className = "pwrap";
+    for (const c of ["rip", "rip r2", "rip r3"]) { const r = document.createElement("span"); r.className = c; w.append(r); }
+    const a = av(q.uid, nm, "click"); a.onclick = () => openProfile(q.uid, q.name); w.append(a);
+    const n = document.createElement("div"); n.className = "pn"; n.textContent = nm + (q.muted ? " 🔇" : "");
+    cell.append(w, n); box.append(cell);
+  }
+}
+$("vTitle").onclick = () => {
+  if (!voice) return;
+  if (!view || view.kind !== "server" || view.sid !== voice.sid) go({kind: "server", sid: voice.sid});
+  stage = true; applyStage();
+};
+
+// screen sharing: each viewer gets its own one-way connection from the sharer, separate from the voice connections
+if (!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia)) $("sShare").hidden = true;
+function addShareTile(uid, stream, local) {
+  removeShareTile(uid);
+  const t = document.createElement("div"); t.className = "stile"; t.dataset.uid = uid;
+  if (local) {
+    t.classList.add("slocal"); t.append(document.createTextNode("🖥️ You're sharing your screen"));
+    const b = document.createElement("button"); b.type = "button"; b.textContent = "Stop sharing"; b.onclick = stopShare; t.append(b);
+  } else {
+    const vid = document.createElement("video"); vid.autoplay = true; vid.muted = true; vid.playsInline = true; vid.srcObject = stream;
+    vid.play().catch(() => {});
+    vid.onclick = () => { if (vid.requestFullscreen) vid.requestFullscreen().catch(() => {}); };
+    const peer = voice && voice.peers.find(q => q.uid === uid), nm = shown(uid, peer ? peer.name : "Someone");
+    const cap = document.createElement("div"); cap.className = "scap"; cap.textContent = nm + "'s screen · tap to go fullscreen";
+    t.append(vid, cap); $("vStatus").textContent = "🖥️ " + nm + " is sharing their screen";
+  }
+  $("shares").append(t);
+}
+function removeShareTile(uid) {
+  const t = $("shares").querySelector('[data-uid="' + uid + '"]'); if (t) t.remove();
+  if (!$("shares").querySelector(".stile") && $("vStatus").textContent.includes("sharing their screen")) $("vStatus").textContent = "";
+}
+function closeScreenIn(v, uid) {
+  const en = v.sin[uid]; if (!en) return;
+  try { en.pc.close(); } catch {} delete v.sin[uid]; removeShareTile(uid);
+}
+async function sendScreenTo(v, uid) {
+  if (!v.screen || v.sout[uid]) return;
+  const pc = new RTCPeerConnection({iceServers: ICE_SERVERS}), en = v.sout[uid] = {pc, pending: []};
+  const sender = pc.addTrack(v.screen.getVideoTracks()[0], v.screen);
+  pc.onicecandidate = e => { if (e.candidate) sendSignal(v, uid, "sice", {dir: "toViewer", c: e.candidate.toJSON()}); };
+  const offer = await pc.createOffer(); await pc.setLocalDescription(offer);
+  try { const prm = sender.getParameters(); if (!prm.encodings || !prm.encodings.length) prm.encodings = [{}]; prm.encodings[0].maxBitrate = 1500000; await sender.setParameters(prm); } catch {}
+  sendSignal(v, uid, "soffer", {type: offer.type, sdp: offer.sdp});
+}
+async function startShare() {
+  const v = voice; if (!v || v.screen) return;
+  let ds;
+  try { ds = await navigator.mediaDevices.getDisplayMedia({video: {frameRate: 15}, audio: false}); }
+  catch (err) { if (err.name !== "NotAllowedError") alert("Couldn't start screen sharing: " + err.message); return; }
+  v.screen = ds;
+  ds.getVideoTracks()[0].onended = () => stopShare();
+  addShareTile(user.uid, ds, true);
+  v.peers.filter(fresh).map(q => q.uid).filter(u => u !== user.uid).forEach(uid => sendScreenTo(v, uid).catch(() => {}));
+  showVoiceBar();
+}
+function stopShare() {
+  const v = voice; if (!v || !v.screen) return;
+  v.screen.getTracks().forEach(t => { t.onended = null; t.stop(); }); v.screen = null;
+  Object.keys(v.sout).forEach(uid => { sendSignal(v, uid, "sstop", {}); try { v.sout[uid].pc.close(); } catch {} delete v.sout[uid]; });
+  removeShareTile(user.uid); showVoiceBar();
+}
+$("sShare").onclick = () => voice && (voice.screen ? stopShare() : startShare());
+
+// leaving a server (owners can't leave their own server)
+$("leaveSrv").onclick = async () => {
+  const s = servers.find(x => x.id === view.sid); if (!s) return;
+  if (s.ownerId === user.uid) return alert("You own this server, so you can't leave it.");
+  if (!confirm("Leave " + s.name + "? You'll need an invite code to rejoin.")) return;
+  try {
+    if (voice && voice.sid === s.id) await leaveVoice();
+    go({kind: "home"});
+    await updateDoc(doc(db, "servers", s.id), {members: arrayRemove(user.uid)});
+  } catch (err) { alert("Couldn't leave: " + err.message); }
 };
 
 /* ---------- profile dialog ---------- */
@@ -1163,6 +1311,12 @@ service cloud.firestore {
         && request.resource.data.members.hasAll(resource.data.members)
         && request.resource.data.members.size() <= resource.data.members.size() + 1
         && request.auth.uid in request.resource.data.members;
+      allow update: if signedIn() && request.auth.uid in resource.data.members
+        && request.auth.uid != resource.data.ownerId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members'])
+        && !(request.auth.uid in request.resource.data.members)
+        && request.resource.data.members.size() == resource.data.members.size() - 1
+        && resource.data.members.hasAll(request.resource.data.members);
       allow update: if signedIn() && request.auth.uid == resource.data.ownerId
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'icon'])
         && request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 32
