@@ -8,13 +8,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+<script>try{var t=localStorage.getItem("blah.theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <style>
-:root{--bg1:#1a1b1e;--bg2:#232428;--bg3:#2c2d32;--line:#383a40;--txt:#e3e5e8;--mut:#9a9ea6;--brand:#ee3f65;--brand2:#ff7a95;--err:#ff6b6b}
+:root{color-scheme:dark;--bg1:#1a1b1e;--bg2:#232428;--bg3:#2c2d32;--line:#383a40;--txt:#e3e5e8;--mut:#9a9ea6;--brand:#ee3f65;--brand2:#ff7a95;--onbrand:#fff;--err:#ff6b6b;--errtxt:#ff8a9d;--panel:rgba(18,12,16,.88);--edge:rgba(255,255,255,.09);--field:rgba(0,0,0,.35);--hover:rgba(255,255,255,.03);--glow1:rgba(255,77,109,.38);--glow2:rgba(150,15,60,.55);--gA:#14070d;--gB:#2a0c1b}
+:root[data-theme=pastel]{color-scheme:light;--bg1:#fbdce7;--bg2:#fdeaf1;--bg3:#fff6f9;--line:#f2c6d6;--txt:#4a2c3a;--mut:#9a6a7e;--brand:#f48fb1;--brand2:#c2185b;--onbrand:#4a1d2f;--err:#e5484d;--errtxt:#c0262d;--panel:rgba(255,246,250,.92);--edge:rgba(240,150,180,.35);--field:rgba(255,255,255,.9);--hover:rgba(240,98,146,.07);--glow1:rgba(255,182,213,.9);--glow2:rgba(206,190,255,.7);--gA:#fff0f6;--gB:#ffd9e8}
+:root[data-theme=galaxy]{--bg1:#120a24;--bg2:#1b1133;--bg3:#241a42;--line:#3a2c63;--txt:#ece6ff;--mut:#a89cd0;--brand:#8b5cf6;--brand2:#b79cff;--onbrand:#fff;--err:#ff6b8b;--errtxt:#ff9ab0;--panel:rgba(20,12,40,.88);--edge:rgba(160,130,255,.2);--field:rgba(0,0,0,.35);--hover:rgba(255,255,255,.04);--glow1:rgba(139,92,246,.5);--glow2:rgba(236,72,153,.35);--gA:#0c0718;--gB:#2a1459}
+:root[data-theme=ocean]{--bg1:#0b1622;--bg2:#102131;--bg3:#162b40;--line:#27435d;--txt:#e4f1ff;--mut:#8fb0cc;--brand:#2d9cdb;--brand2:#6fc3f5;--onbrand:#fff;--err:#ff6b6b;--errtxt:#ff9a9a;--panel:rgba(10,24,38,.88);--edge:rgba(111,195,245,.18);--field:rgba(0,0,0,.35);--hover:rgba(255,255,255,.04);--glow1:rgba(45,156,219,.45);--glow2:rgba(20,184,166,.3);--gA:#08121c;--gB:#0f3452}
+:root[data-theme=mint]{color-scheme:light;--bg1:#d9f3e6;--bg2:#e8f9f0;--bg3:#f6fffa;--line:#bfe5d2;--txt:#1f3b2f;--mut:#5f8a76;--brand:#5fd1a0;--brand2:#1b8a5c;--onbrand:#0f3a28;--err:#e5484d;--errtxt:#c0262d;--panel:rgba(244,255,249,.92);--edge:rgba(80,190,140,.35);--field:rgba(255,255,255,.9);--hover:rgba(40,160,110,.07);--glow1:rgba(120,230,180,.7);--glow2:rgba(150,200,255,.5);--gA:#f3fff9;--gB:#cdf3e0}
+:root[data-theme=sunset]{--bg1:#1d1111;--bg2:#291717;--bg3:#341e1d;--line:#4d2d2a;--txt:#ffeee6;--mut:#c9a095;--brand:#ff7a45;--brand2:#ffa982;--onbrand:#2b0f05;--err:#ff5c7a;--errtxt:#ff9aae;--panel:rgba(30,14,12,.88);--edge:rgba(255,140,100,.2);--field:rgba(0,0,0,.35);--hover:rgba(255,255,255,.04);--glow1:rgba(255,122,69,.45);--glow2:rgba(255,60,120,.3);--gA:#170b0b;--gB:#4a1a14}
 *{box-sizing:border-box;margin:0}
 html,body{height:100%}
 body{font:15px/1.45 "Figtree","Segoe UI",system-ui,sans-serif;background:var(--bg3);color:var(--txt)}
 button,input{font:inherit;color:inherit}
-button{cursor:pointer;border:0;border-radius:6px;background:var(--brand);color:#fff;padding:9px 14px;font-weight:600}
+button{cursor:pointer;border:0;border-radius:6px;background:var(--brand);color:var(--onbrand);padding:9px 14px;font-weight:600}
 button.ghost{background:transparent;color:var(--mut);padding:4px 8px}
 button.ghost:hover{color:var(--txt)}
 input:focus{border-color:var(--brand);outline:none}
@@ -23,9 +29,9 @@ input{background:var(--bg1);border:1px solid var(--line);border-radius:6px;paddi
 [hidden]{display:none!important}
 
 #login{height:100%;overflow:auto;display:flex;
- background:radial-gradient(900px 600px at 12% 8%,rgba(255,77,109,.38),transparent 60%),radial-gradient(800px 600px at 92% 95%,rgba(150,15,60,.55),transparent 60%),linear-gradient(135deg,#14070d,#2a0c1b)}
-#login .box{width:min(440px,100%);min-height:100%;display:flex;flex-direction:column;justify-content:center;padding:40px 36px;background:rgba(18,12,16,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-right:1px solid rgba(255,255,255,.09);box-shadow:12px 0 48px rgba(0,0,0,.4);text-align:left}
-#login input{background:rgba(0,0,0,.35)}
+ background:radial-gradient(900px 600px at 12% 8%,var(--glow1),transparent 60%),radial-gradient(800px 600px at 92% 95%,var(--glow2),transparent 60%),linear-gradient(135deg,var(--gA),var(--gB))}
+#login .box{width:min(440px,100%);min-height:100%;display:flex;flex-direction:column;justify-content:center;padding:40px 36px;background:var(--panel);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-right:1px solid var(--edge);box-shadow:12px 0 48px rgba(0,0,0,.4);text-align:left}
+#login input{background:var(--field)}
 .brand{font-family:"Outfit","Figtree",system-ui,sans-serif;font-weight:600;display:flex;align-items:center;gap:10px;color:var(--txt)}
 .brand .logo{width:30px;height:26px;flex:none}
 .brand.big{justify-content:flex-start;gap:14px;margin-bottom:6px}
@@ -36,7 +42,7 @@ input{background:var(--bg1);border:1px solid var(--line);border-radius:6px;paddi
 .small{font-size:13px;color:var(--mut);margin-top:4px}
 button.link{background:none;padding:0;color:var(--brand2);font-weight:600;font-size:inherit}
 button.link:hover{text-decoration:underline}
-.err{color:#ff8a9d;font-size:13px;min-height:18px}
+.err{color:var(--errtxt);font-size:13px;min-height:18px}
 
 #app{height:100%;display:grid;grid-template-columns:auto 1fr}
 #side{background:var(--bg2);display:flex;flex-direction:column;min-height:0}
@@ -45,7 +51,7 @@ button.link:hover{text-decoration:underline}
 #chs{list-style:none;padding:0 8px;overflow:auto;flex:1}
 #chs li button{width:100%;text-align:left;background:transparent;color:var(--mut);padding:7px 10px;font-weight:500}
 #chs li button:hover{background:var(--bg3);color:var(--txt)}
-#chs li.on button{background:var(--bg3);color:#fff}
+#chs li.on button{background:var(--bg3);color:var(--txt)}
 #me{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg1)}
 #me .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
 .av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;flex:none}
@@ -57,7 +63,7 @@ button.link:hover{text-decoration:underline}
 #msgs{flex:1;overflow:auto;padding:12px 0}
 .m{display:flex;gap:14px;padding:2px 16px}
 .m.first{margin-top:14px}
-.m:hover{background:rgba(255,255,255,.03)}
+.m:hover{background:var(--hover)}
 .m .gut{width:38px;flex:none;font-size:10px;color:transparent;text-align:right;padding-top:4px}
 .m:hover .gut{color:var(--mut)}
 .m .who{font-weight:700;margin-right:8px}
@@ -74,10 +80,10 @@ button.link:hover{text-decoration:underline}
 #rail{width:72px;background:var(--bg1);display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px 0;overflow:auto}
 #srvs{display:flex;flex-direction:column;align-items:center;gap:10px}
 .srv{width:48px;height:48px;border-radius:50%;padding:0;background:var(--bg3);color:var(--txt);display:grid;place-items:center;font-weight:700;transition:border-radius .15s,background .15s}
-.srv:hover,.srv.on{border-radius:16px;background:var(--brand);color:#fff}
+.srv:hover,.srv.on{border-radius:16px;background:var(--brand);color:var(--onbrand)}
 .srv .logo{width:28px;height:24px}
 .srv.add{color:var(--brand2);font-size:24px;font-weight:500}
-.srv.add:hover{color:#fff}
+.srv.add:hover{color:var(--onbrand)}
 #inv{padding:8px 16px;font-size:13px;color:var(--mut);border-top:1px solid var(--line)}
 button.outline{background:transparent;border:1px solid var(--brand);color:var(--brand2)}
 dialog{background:var(--bg2);color:var(--txt);border:1px solid var(--line);border-radius:16px;padding:22px;width:min(380px,92vw);margin:auto}
@@ -103,7 +109,7 @@ dialog .ghost{margin-top:8px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .swatches{display:flex;gap:8px;flex-wrap:wrap}
 .swatches button{width:28px;height:28px;border-radius:50%;padding:0;border:2px solid transparent}
-.swatches button.on{border-color:#fff}
+.swatches button.on{border-color:var(--txt)}
 .srv.pv,.srv.pv:hover{border-radius:16px;background-color:var(--bg3);cursor:default;flex:none}
 .m{position:relative}
 .acts{position:absolute;right:16px;top:-8px;display:flex;gap:4px;opacity:0;z-index:1}
@@ -115,7 +121,7 @@ dialog .ghost{margin-top:8px}
 .picker button{font-size:16px;padding:1px 6px;border:0;background:transparent}
 .rx{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
 .rx button{padding:1px 9px;border-radius:12px;background:var(--bg2);border:1px solid var(--line);color:var(--txt);font-weight:500;font-size:13px}
-.rx button.me{border-color:var(--brand);background:rgba(238,63,101,.16)}
+.rx button.me{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 18%,transparent)}
 .banner{height:96px;margin:-22px -22px 16px;border-radius:16px 16px 0 0;background-size:cover;background-position:center}
 .empty p{max-width:440px;margin-bottom:14px}
 #chTitle.click:hover{text-decoration:underline}
@@ -148,7 +154,8 @@ dialog .ghost{margin-top:8px}
 .vp.speaking .av{box-shadow:0 0 0 2px #3ddc84}
 .opt{display:flex;align-items:center;gap:6px;cursor:pointer}
 #cdlg input[type=radio]{width:auto}
-#leaveSrv{color:#ff8a9d}
+#leaveSrv{color:var(--errtxt)}
+#vLeave,.pill,.rnd.off{color:#fff}
 #stage{flex:1;min-height:0;display:flex;flex-direction:column;overflow:auto}
 #shares{display:flex;flex-direction:column;gap:12px;padding:12px 16px}
 #shares:empty{display:none}
@@ -172,6 +179,16 @@ dialog .ghost{margin-top:8px}
 .rnd.off{background:var(--err)}
 .rnd.on{background:var(--brand)}
 .pill{background:var(--err);border-radius:26px;padding:0 22px;height:52px}
+.edited{color:var(--mut);font-size:11px}
+.editbox{display:grid;gap:6px;margin-top:2px}
+.editbox .row button{padding:5px 12px}
+.sh{font:600 13px "Outfit","Figtree",sans-serif;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;margin:18px 0 8px}
+#stdlg{width:min(440px,94vw)}
+.themes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tcard{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);color:var(--txt);border:2px solid transparent;text-align:left;font-weight:600;font-size:13px}
+.tcard.on{border-color:var(--brand)}
+.tsw{width:32px;height:32px;border-radius:50%;flex:none;border:1px solid var(--line)}
+#accent{width:56px;height:40px;padding:2px;flex:none;cursor:pointer}
 @media(max-width:700px){
  #app{grid-template-columns:1fr}
  #nav{position:fixed;inset:0 10% 0 0;z-index:5;transform:translateX(-100%);transition:transform .2s;box-shadow:4px 0 24px #0008}
@@ -222,7 +239,7 @@ dialog .ghost{margin-top:8px}
       <div class="sec"><span id="listLabel">People</span><button id="addCh" class="ghost" title="New" aria-label="New">+</button></div>
       <ul id="chs"></ul>
       <div id="inv" hidden>Invite code: <button type="button" class="link" id="copyInv"></button> · <button type="button" class="link" id="leaveSrv">Leave server</button></div>
-      <div id="me"><div class="av" id="meAv" title="Edit profile"></div><span class="nm" id="meNm" title="Edit profile"></span><button id="out" class="ghost">Sign out</button></div>
+      <div id="me"><div class="av" id="meAv" title="Edit profile"></div><span class="nm" id="meNm" title="Edit profile"></span><button id="setBtn" class="ghost" title="Settings" aria-label="Settings">⚙</button></div>
     </aside>
   </div>
   <main id="main">
@@ -277,6 +294,18 @@ dialog .ghost{margin-top:8px}
   <div class="form"><button type="button" id="pDm" hidden>Send message</button></div>
   <div class="err" id="pErr" role="alert"></div>
   <button type="button" class="ghost" id="pClose">Close</button>
+</dialog>
+
+<dialog id="stdlg">
+  <h3>Settings</h3>
+  <div class="sh">Theme</div>
+  <div id="themes" class="themes"></div>
+  <div class="sh">Accent color</div>
+  <div class="row"><input type="color" id="accent" aria-label="Accent color"><button type="button" class="ghost" id="accReset">Reset to theme color</button></div>
+  <div class="sh">Account</div>
+  <div class="small" id="acct"></div>
+  <div class="row" style="margin-top:8px"><button type="button" class="outline" id="stProfile">Edit profile</button><button type="button" class="ghost" id="stOut">Sign out</button></div>
+  <button type="button" class="ghost" id="stClose">Close</button>
 </dialog>
 
 <dialog id="cdlg">
@@ -355,7 +384,7 @@ let servers = [], dms = [], chans = [];
 let view = null;                       // {kind:"home"} | {kind:"dm", id} | {kind:"server", sid, cid}
 let unsubs = [], unsubChans = null, unsubMsgs = null, curPath = null;
 let profiles = {}, lastDocs = [], firstLoad = true, emojis = {};
-let voice = null, vparts = {}, vunsubs = [], speakingNow = new Set(), staleTimer = 0, stage = false;
+let voice = null, vparts = {}, vunsubs = [], speakingNow = new Set(), staleTimer = 0, stage = false, editing = null;
 const watching = new Set();
 
 const color = s => { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) % 360; return `hsl(${h} 55% 48%)`; };
@@ -406,7 +435,11 @@ function refresh() {
   if (raf) return;
   raf = requestAnimationFrame(() => { raf = 0; if (!user) return; updateMe(); renderSide(); renderMsgs(false); });
 }
-function updateMe() { const n = shown(user.uid, me); $("meNm").textContent = n; paint($("meAv"), profiles[user.uid], n, user.uid); }
+function updateMe() {
+  const n = shown(user.uid, me), pr = profiles[user.uid] || {};
+  $("meNm").textContent = n; paint($("meAv"), pr, n, user.uid);
+  if (pr.theme && THEMES[pr.theme] && (pr.theme !== theme || (pr.accent || "") !== accent)) applyTheme(pr.theme, pr.accent || "");
+}
 // Crops + shrinks to w x h (JPEG). GIFs are kept as-is (animated) when anim is true and the file is small enough.
 function prepImage(file, w = 128, h = w, anim = true) {
   return new Promise((res, rej) => {
@@ -478,7 +511,7 @@ $("signup").onsubmit = async e => {
     start(auth.currentUser);
   } catch (err) { creating = false; showErr("err2", err); }
 };
-$("out").onclick = async () => { await leaveVoice(); signOut(auth); };
+$("stOut").onclick = async () => { await leaveVoice(); $("stdlg").close(); signOut(auth); };
 onAuthStateChanged(auth, u => { if (creating) return; u ? start(u) : stop(); });
 
 function start(u) {
@@ -668,7 +701,7 @@ function openMsgs() {
   unsubMsgs && unsubMsgs(); unsubMsgs = null;
   const box = $("msgs");
   let title = "";
-  curPath = null; lastDocs = []; firstLoad = true;
+  curPath = null; lastDocs = []; firstLoad = true; editing = null;
   if (view.kind === "server" && view.cid) {
     const c = chans.find(x => x.id === view.cid);
     curPath = ["servers", view.sid, "channels", view.cid, "messages"]; title = "# " + (c ? c.name : view.cid);
@@ -730,7 +763,12 @@ function renderMsgs(fromSnap) {
       const s = document.createElement("span"); s.className = "when"; s.textContent = t.toLocaleDateString([], {month: "short", day: "numeric"}) + ", " + time;
       h.append(w, s); c.append(h);
     }
-    if (m.text) { const b = document.createElement("div"); b.className = "body"; b.append(richText(m.text)); c.append(b); }
+    if (editing && editing.id === m.id && m.uid === user.uid) c.append(editBox(path, m));
+    else if (m.text) {
+      const b = document.createElement("div"); b.className = "body"; b.append(richText(m.text));
+      if (m.edited) { const e = document.createElement("span"); e.className = "edited"; e.textContent = " (edited)"; b.append(e); }
+      c.append(b);
+    }
     if (isImg(m.image)) {
       const im = document.createElement("img"); im.className = "pic"; im.alt = "Image from " + shown(m.uid, m.name);
       if (m.w > 0 && m.h > 0) { im.width = m.w; im.height = m.h; }
@@ -765,6 +803,11 @@ function renderMsgs(fromSnap) {
         acts.prepend(pk);
       };
       acts.append(rb);
+      if (m.uid === user.uid && !(editing && editing.id === m.id)) {
+        const ed = document.createElement("button"); ed.type = "button"; ed.textContent = "Edit"; ed.setAttribute("aria-label", "Edit message");
+        ed.onclick = () => { editing = {id: m.id, value: m.text || ""}; renderMsgs(false); };
+        acts.append(ed);
+      }
       if (m.uid === user.uid || owner) {
         const x = document.createElement("button"); x.type = "button"; x.className = "del"; x.textContent = "Delete";
         x.setAttribute("aria-label", "Delete message");
@@ -1201,6 +1244,83 @@ $("leaveSrv").onclick = async () => {
   } catch (err) { alert("Couldn't leave: " + err.message); }
 };
 
+/* ---------- message editing, themes + settings ---------- */
+function editBox(path, m) {
+  const w = document.createElement("div"); w.className = "editbox";
+  const i = document.createElement("input"); i.maxLength = 2000; i.value = editing.value; i.setAttribute("aria-label", "Edit message");
+  i.oninput = () => { editing.value = i.value; };
+  const save = async () => {
+    const t = i.value.trim(); if (!t && !m.image) return;
+    editing = null;
+    if (t !== (m.text || "")) {
+      try { await updateDoc(doc(db, ...path, m.id), {text: t, edited: true}); } catch (err) { alert("Couldn't edit: " + err.message); }
+    }
+    renderMsgs(false);
+  };
+  const cancel = () => { editing = null; renderMsgs(false); };
+  i.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); save(); } else if (e.key === "Escape") cancel(); };
+  const row = document.createElement("div"); row.className = "row";
+  const s = document.createElement("button"); s.type = "button"; s.textContent = "Save"; s.onclick = save;
+  const c = document.createElement("button"); c.type = "button"; c.className = "ghost"; c.textContent = "Cancel"; c.onclick = cancel;
+  const h = document.createElement("span"); h.className = "small"; h.textContent = "Enter to save · Esc to cancel";
+  row.append(s, c, h); w.append(i, row);
+  setTimeout(() => { i.focus(); i.setSelectionRange(i.value.length, i.value.length); }, 0);
+  return w;
+}
+
+const THEMES = {
+  blah:   {name: "Blah",          light: false, sw: ["#232428", "#ee3f65"]},
+  pastel: {name: "Pastel Pink",   light: true,  sw: ["#fdeaf1", "#f48fb1"]},
+  galaxy: {name: "Galaxy Purple", light: false, sw: ["#1b1133", "#8b5cf6"]},
+  ocean:  {name: "Ocean",         light: false, sw: ["#102131", "#2d9cdb"]},
+  mint:   {name: "Mint",          light: true,  sw: ["#e8f9f0", "#5fd1a0"]},
+  sunset: {name: "Sunset",        light: false, sw: ["#291717", "#ff7a45"]}
+};
+let theme = "blah", accent = "";
+const rgbOf = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const mixHex = (a, b, t) => "#" + rgbOf(a).map((x, i) => Math.round(x + (rgbOf(b)[i] - x) * t).toString(16).padStart(2, "0")).join("");
+
+function applyTheme(id, acc) {
+  if (!THEMES[id]) id = "blah";
+  theme = id; accent = isHex(acc) ? acc.toLowerCase() : "";
+  const root = document.documentElement;
+  root.dataset.theme = id;
+  ["--brand", "--brand2", "--onbrand"].forEach(k => root.style.removeProperty(k));
+  if (accent) {
+    const [r, g, b] = rgbOf(accent);
+    root.style.setProperty("--brand", accent);
+    root.style.setProperty("--brand2", mixHex(accent, THEMES[id].light ? "#000000" : "#ffffff", 0.35));
+    root.style.setProperty("--onbrand", (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.62 ? "#1a1a1a" : "#ffffff");
+  }
+  try { localStorage.setItem("blah.theme", theme); localStorage.setItem("blah.accent", accent); } catch {}
+  $("accent").value = accent || THEMES[id].sw[1];
+  renderThemeCards();
+}
+function saveTheme() {
+  if (user) setDoc(doc(db, "users", user.uid), {theme, accent}, {merge: true}).catch(() => {});
+}
+function renderThemeCards() {
+  const box = $("themes"); box.innerHTML = "";
+  for (const id of Object.keys(THEMES)) {
+    const t = THEMES[id], b = document.createElement("button"); b.type = "button"; b.className = "tcard" + (id === theme ? " on" : "");
+    const sw = document.createElement("span"); sw.className = "tsw"; sw.style.background = `linear-gradient(135deg, ${t.sw[0]} 50%, ${t.sw[1]} 50%)`;
+    b.append(sw, document.createTextNode(t.name));
+    b.onclick = () => { applyTheme(id, accent); saveTheme(); };
+    box.append(b);
+  }
+}
+$("setBtn").onclick = () => { $("acct").textContent = "Signed in as @" + me; renderThemeCards(); $("stdlg").showModal(); };
+$("stClose").onclick = () => $("stdlg").close();
+$("accent").oninput = e => applyTheme(theme, e.target.value);
+$("accent").onchange = saveTheme;
+$("accReset").onclick = () => { applyTheme(theme, ""); saveTheme(); };
+$("stProfile").onclick = () => { $("stdlg").close(); openProfile(user.uid, me); };
+{
+  let t = "", a = "";
+  try { t = localStorage.getItem("blah.theme") || ""; a = localStorage.getItem("blah.accent") || ""; } catch {}
+  applyTheme(t, a);
+}
+
 /* ---------- profile dialog ---------- */
 const COLORS = ["#ee3f65", "#f59e0b", "#22c55e", "#14b8a6", "#3b82f6", "#8b5cf6", "#ec4899", "#64748b"];
 let draft = {}, pUid = null, pUname = "", sdraft = {};
@@ -1336,6 +1456,9 @@ service cloud.firestore {
           allow read: if inServer(s);
           allow create: if inServer(s) && okMsg();
           allow update: if inServer(s) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions']);
+          allow update: if inServer(s) && resource.data.uid == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'edited'])
+            && request.resource.data.text is string && request.resource.data.text.size() <= 2000;
           allow delete: if signedIn() && (resource.data.uid == request.auth.uid
             || request.auth.uid == get(/databases/$(database)/documents/servers/$(s)).data.ownerId);
         }
@@ -1350,6 +1473,9 @@ service cloud.firestore {
         allow read: if inDm(d);
         allow create: if inDm(d) && okMsg();
         allow update: if inDm(d) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions']);
+        allow update: if inDm(d) && resource.data.uid == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'edited'])
+          && request.resource.data.text is string && request.resource.data.text.size() <= 2000;
         allow delete: if inDm(d) && resource.data.uid == request.auth.uid;
       }
     }
