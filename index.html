@@ -11,6 +11,7 @@
 <script>try{var t=localStorage.getItem("blah.theme");if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <style>
 :root{color-scheme:dark;--bg1:#1a1b1e;--bg2:#232428;--bg3:#2c2d32;--line:#383a40;--txt:#e3e5e8;--mut:#9a9ea6;--brand:#ee3f65;--brand2:#ff7a95;--onbrand:#fff;--err:#ff6b6b;--errtxt:#ff8a9d;--panel:rgba(18,12,16,.88);--edge:rgba(255,255,255,.09);--field:rgba(0,0,0,.35);--hover:rgba(255,255,255,.03);--glow1:rgba(255,77,109,.38);--glow2:rgba(150,15,60,.55);--gA:#14070d;--gB:#2a0c1b}
+:root[data-theme=light]{color-scheme:light;--bg1:#e4e6eb;--bg2:#f0f1f4;--bg3:#ffffff;--line:#d3d6dd;--txt:#1f2328;--mut:#656d76;--brand:#ee3f65;--brand2:#c2185b;--onbrand:#ffffff;--err:#e5484d;--errtxt:#c0262d;--panel:rgba(255,255,255,.93);--edge:rgba(0,0,0,.1);--field:rgba(0,0,0,.05);--hover:rgba(0,0,0,.04);--glow1:rgba(255,120,150,.5);--glow2:rgba(190,200,255,.6);--gA:#f6f7f9;--gB:#e1e5ee}
 :root[data-theme=pastel]{color-scheme:light;--bg1:#fbdce7;--bg2:#fdeaf1;--bg3:#fff6f9;--line:#f2c6d6;--txt:#4a2c3a;--mut:#9a6a7e;--brand:#f48fb1;--brand2:#c2185b;--onbrand:#4a1d2f;--err:#e5484d;--errtxt:#c0262d;--panel:rgba(255,246,250,.92);--edge:rgba(240,150,180,.35);--field:rgba(255,255,255,.9);--hover:rgba(240,98,146,.07);--glow1:rgba(255,182,213,.9);--glow2:rgba(206,190,255,.7);--gA:#fff0f6;--gB:#ffd9e8}
 :root[data-theme=galaxy]{--bg1:#120a24;--bg2:#1b1133;--bg3:#241a42;--line:#3a2c63;--txt:#ece6ff;--mut:#a89cd0;--brand:#8b5cf6;--brand2:#b79cff;--onbrand:#fff;--err:#ff6b8b;--errtxt:#ff9ab0;--panel:rgba(20,12,40,.88);--edge:rgba(160,130,255,.2);--field:rgba(0,0,0,.35);--hover:rgba(255,255,255,.04);--glow1:rgba(139,92,246,.5);--glow2:rgba(236,72,153,.35);--gA:#0c0718;--gB:#2a1459}
 :root[data-theme=ocean]{--bg1:#0b1622;--bg2:#102131;--bg3:#162b40;--line:#27435d;--txt:#e4f1ff;--mut:#8fb0cc;--brand:#2d9cdb;--brand2:#6fc3f5;--onbrand:#fff;--err:#ff6b6b;--errtxt:#ff9a9a;--panel:rgba(10,24,38,.88);--edge:rgba(111,195,245,.18);--field:rgba(0,0,0,.35);--hover:rgba(255,255,255,.04);--glow1:rgba(45,156,219,.45);--glow2:rgba(20,184,166,.3);--gA:#08121c;--gB:#0f3452}
@@ -202,6 +203,33 @@ select{background:var(--bg1);border:1px solid var(--line);border-radius:6px;padd
 .recdot{width:10px;height:10px;border-radius:50%;background:var(--err);animation:blink 1s infinite}
 @keyframes blink{50%{opacity:.25}}
 @media(prefers-reduced-motion:reduce){.recdot{animation:none}}
+#bgimg{position:fixed;inset:0;z-index:-1;background-size:cover;background-position:center;background-repeat:no-repeat}
+html.has-bg{background:var(--bg1)}
+html.has-bg body{background:transparent}
+html.has-bg #main{background:color-mix(in srgb,var(--bg3) var(--veil),transparent)}
+html.has-bg #side{background:color-mix(in srgb,var(--bg2) var(--veil),transparent)}
+html.has-bg #rail{background:color-mix(in srgb,var(--bg1) var(--veil),transparent)}
+.pal{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}
+.pal label{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer}
+.pal input[type=color]{width:36px;height:30px;padding:1px;flex:none;cursor:pointer}
+#veil{padding:0;cursor:pointer}
+.srv{position:relative}
+.bdg{position:absolute;right:-3px;bottom:-3px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--err);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;border:2px solid var(--bg1);box-sizing:content-box;line-height:1}
+.bdg.soft{background:var(--brand);color:var(--onbrand)}
+#chs li button .bdg{position:static;margin-left:auto;border-color:transparent}
+#chs li button.unread{color:var(--txt);font-weight:700}
+.mention{background:color-mix(in srgb,var(--brand) 22%,transparent);color:var(--brand2);border-radius:4px;padding:0 3px;font-weight:600}
+.m.mentioned{background:color-mix(in srgb,var(--brand) 11%,transparent);box-shadow:inset 3px 0 0 var(--brand)}
+#f{position:relative}
+#mpop{position:absolute;left:16px;bottom:100%;width:min(320px,calc(100% - 32px));max-height:240px;overflow:auto;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:4px;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:3}
+.mi{display:flex;align-items:center;gap:8px;width:100%;padding:6px 8px;background:transparent;color:var(--txt);text-align:left;font-weight:500}
+.mi.on,.mi:hover{background:var(--bg3)}
+.mi .small{margin:0 0 0 auto}
+#toasts{position:fixed;top:12px;right:12px;display:grid;gap:8px;z-index:50;width:min(320px,calc(100vw - 24px))}
+.toast{background:var(--bg2);color:var(--txt);border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:10px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,.35);cursor:pointer}
+.toast b{display:block}
+.toast span{color:var(--mut);font-size:13px;overflow-wrap:anywhere}
+#nsound{width:auto}
 @media(max-width:700px){
  #app{grid-template-columns:1fr}
  #nav{position:fixed;inset:0 10% 0 0;z-index:5;transform:translateX(-100%);transition:transform .2s;box-shadow:4px 0 24px #0008}
@@ -214,6 +242,8 @@ select{background:var(--bg1);border:1px solid var(--line);border-radius:6px;padd
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="logo" viewBox="170 290 940 790"><path fill="currentColor" fill-rule="evenodd" d="M293 313H987Q1087 313 1087 413V820Q1087 920 987 920H485C465 975 420 1030 340 1050C285 1062 262 1040 272 1018C292 985 303 955 307 920H293Q193 920 193 820V413Q193 313 293 313ZM425 565L855 572Q892 580 890 598C850 700 760 778 640 778C520 778 430 700 392 598Q390 565 425 565Z"/></symbol></svg>
+
+<div id="bgimg"></div>
 
 <section id="login">
   <div class="box">
@@ -271,6 +301,7 @@ select{background:var(--bg1);border:1px solid var(--line);border-radius:6px;padd
     </div>
     <div id="msgs" aria-live="polite"></div>
     <form id="f">
+      <div id="mpop" hidden role="listbox"></div>
       <div id="prev" hidden><img id="pvImg" alt="Attached image preview"><button type="button" class="ghost" id="pvX">✕ Remove</button></div>
       <div id="bar"><button type="button" id="attach" class="ghost" aria-label="Attach image" title="Attach image">📎</button><button type="button" id="emBtn" class="ghost" aria-label="Emojis" title="Emojis">😀</button><button type="button" id="micBtn" class="ghost" aria-label="Record a voice message" title="Record a voice message">🎤</button>
         <input id="txt" maxlength="2000" autocomplete="off"><input type="file" id="imgFile" accept="image/*" hidden></div>
@@ -314,12 +345,26 @@ select{background:var(--bg1);border:1px solid var(--line);border-radius:6px;padd
   <button type="button" class="ghost" id="pClose">Close</button>
 </dialog>
 
+<div id="toasts"></div>
+
 <dialog id="stdlg">
   <h3>Settings</h3>
   <div class="sh">Theme</div>
   <div id="themes" class="themes"></div>
-  <div class="sh">Accent color</div>
-  <div class="row"><input type="color" id="accent" aria-label="Accent color"><button type="button" class="ghost" id="accReset">Reset to theme color</button></div>
+  <div class="sh">Colors</div>
+  <div class="pal" id="pal"></div>
+  <div class="row" style="margin-top:8px"><button type="button" class="ghost" id="palReset">Reset colors</button></div>
+  <div class="sh">Background</div>
+  <input type="file" id="bgFile" accept="image/*" hidden>
+  <div class="row"><button type="button" class="outline" id="bgPick">Upload image or GIF</button><button type="button" class="ghost" id="bgClear">Remove</button></div>
+  <div class="small" id="bgMsg">Pick any picture or GIF (GIFs under about 500 KB). It shows behind the whole app.</div>
+  <label class="small" for="veil" style="display:block;margin-top:10px">Panel opacity over the background</label>
+  <input type="range" id="veil" min="0" max="100" step="5" value="70">
+  <div class="sh">Notifications</div>
+  <div class="themes" id="nmodes"></div>
+  <label class="opt" style="margin-top:10px"><input type="checkbox" id="nsound"> Play a sound</label>
+  <div class="row" style="margin-top:8px"><button type="button" class="outline" id="nperm">Enable desktop notifications</button><span class="small" id="npermMsg" style="margin:0"></span></div>
+  <div class="small">Type @username or @display name to tag someone. Alerts show while blah is open in a tab; anything you miss shows as a badge when you come back.</div>
   <div class="sh">Account</div>
   <div class="small" id="acct"></div>
   <div class="row" style="margin-top:8px"><button type="button" class="outline" id="stProfile">Edit profile</button><button type="button" class="ghost" id="stOut">Sign out</button></div>
@@ -381,7 +426,7 @@ const firebaseConfig = {
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
 import {getAuth,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,updateProfile}
   from "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js";
-import {getFirestore,collection,addDoc,setDoc,getDoc,getDocs,updateDoc,arrayUnion,arrayRemove,doc,deleteDoc,query,where,orderBy,limit,onSnapshot,serverTimestamp}
+import {getFirestore,collection,addDoc,setDoc,getDoc,getDocs,updateDoc,arrayUnion,arrayRemove,doc,deleteDoc,query,where,orderBy,limit,onSnapshot,serverTimestamp,writeBatch,increment}
   from "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js";
 
 // Invite code of the official blah server. Create the server in the app, copy its invite code
@@ -404,6 +449,7 @@ let view = null;                       // {kind:"home"} | {kind:"dm", id} | {kin
 let unsubs = [], unsubChans = null, unsubMsgs = null, curPath = null;
 let profiles = {}, lastDocs = [], firstLoad = true, emojis = {}, myEmojis = {}, srvEmojis = {};
 let voice = null, vparts = {}, vunsubs = [], speakingNow = new Set(), staleTimer = 0, stage = false, editing = null;
+let inbox = {}, inboxReady = false;
 const watching = new Set();
 
 const color = s => { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) % 360; return `hsl(${h} 55% 48%)`; };
@@ -457,7 +503,9 @@ function refresh() {
 function updateMe() {
   const n = shown(user.uid, me), pr = profiles[user.uid] || {};
   $("meNm").textContent = n; paint($("meAv"), pr, n, user.uid);
-  if (pr.theme && THEMES[pr.theme] && (pr.theme !== theme || (pr.accent || "") !== accent)) applyTheme(pr.theme, pr.accent || "");
+  if (!fbDone && prefsChecked && !prefsExists && !isNonDefault() && pr.theme && THEMES[pr.theme]) {
+    fbDone = true; ui = {...UI_DEFAULT(), theme: pr.theme, custom: isHex(pr.accent) ? {brand: pr.accent} : {}}; applyUI(); saveUI();
+  }
 }
 // Crops + shrinks to w x h (JPEG). GIFs are kept as-is (animated) when anim is true and the file is small enough.
 function prepImage(file, w = 128, h = w, anim = true) {
@@ -483,7 +531,12 @@ const toSquare = f => prepImage(f);
 const EMOJI = {like: "👍", heart: "❤️", laugh: "😂", wow: "😮", sad: "😢", fire: "🔥"};
 async function react(path, m, key) {
   const has = ((m.reactions || {})[key] || []).includes(user.uid);
-  try { await updateDoc(doc(db, ...path, m.id), {["reactions." + key]: has ? arrayRemove(user.uid) : arrayUnion(user.uid)}); }
+  const upd = {["reactions." + key]: has ? arrayRemove(user.uid) : arrayUnion(user.uid)};
+  if (!has && key.startsWith("e_")) {          // embed the picture so everyone can see this reaction
+    const nm = key.slice(2), e = emojis[nm];
+    if (e && isImg(e.image) && e.image.length <= 60000 && !(m.remojis && isImg(m.remojis[nm]))) upd["remojis." + nm] = e.image;
+  }
+  try { await updateDoc(doc(db, ...path, m.id), upd); }
   catch (err) { alert("Couldn't react: " + err.message); }
 }
 
@@ -553,8 +606,10 @@ function start(u) {
   }, fail));
   unsubs.push(onSnapshot(query(collection(db, "users", u.uid, "emojis"), orderBy("createdAt", "desc"), limit(200)), snap => {
     myEmojis = {}; snap.forEach(d => { myEmojis[d.id] = d.data(); });
-    mergeEmojis(); refresh(); renderEmojiGrid();
+    mergeEmojis(); refresh(); renderEmojiGrid(); backfillEmojis(curPath);
   }, () => {}));
+  watchPrefs(u.uid);
+  watchInbox(u.uid);
   // one-time move of emojis made before emojis became private/per-server
   getDocs(query(collection(db, "emojis"), where("uid", "==", u.uid))).then(snap => snap.forEach(async d => {
     const e = d.data();
@@ -568,7 +623,7 @@ function stop() {
   unsubs.forEach(f => f()); unsubs = []; watching.clear(); profiles = {};
   unsubChans && unsubChans(); unsubMsgs && unsubMsgs(); unsubChans = unsubMsgs = null;
   user = null; view = null; servers = []; dms = []; chans = []; curPath = null;
-  myEmojis = {}; srvEmojis = {}; emojis = {};
+  myEmojis = {}; srvEmojis = {}; emojis = {}; prefsChecked = false; prefsExists = false; fbDone = false; inbox = {}; inboxReady = false; document.title = "blah";
   $("app").hidden = true; $("login").hidden = false;
   $("inPass").value = ""; show("signin");
 }
@@ -605,12 +660,14 @@ function go(v) {
 
 function renderRail() {
   $("home").classList.toggle("on", view.kind !== "server");
+  setBadge($("home"), badgeFor(Object.values(inbox).filter(d => d.kind === "dm")));
   const box = $("srvs"); box.innerHTML = "";
   for (const s of servers) {
     const b = document.createElement("button");
     b.className = "srv" + (view.kind === "server" && view.sid === s.id ? " on" : "");
     paintServer(b, s); b.title = s.name; b.setAttribute("aria-label", s.name);
     b.onclick = () => go({kind: "server", sid: s.id});
+    setBadge(b, badgeFor(Object.values(inbox).filter(d => d.kind === "server" && d.sid === s.id)));
     box.append(b);
   }
 }
@@ -631,9 +688,10 @@ function renderSide() {
   if (!view) return;
   linkTitle();
   const ul = $("chs"); ul.innerHTML = "";
-  const item = (label, on, fn, lead) => {
+  const item = (label, on, fn, lead, badge) => {
     const li = document.createElement("li"); if (on) li.className = "on";
     const b = document.createElement("button"); b.textContent = label; if (lead) b.prepend(lead);
+    if (badge) { b.classList.add("unread"); setBadge(b, badge); }
     b.onclick = () => { fn(); $("nav").classList.remove("open"); };
     li.append(b); ul.append(li);
   };
@@ -657,13 +715,13 @@ function renderSide() {
           }
           ul.lastElementChild.append(sub);
         }
-      } else item("# " + c.name, c.id === view.cid, () => { stage = false; view.cid = c.id; renderSide(); openMsgs(); applyStage(); });
+      } else item("# " + c.name, c.id === view.cid, () => { stage = false; view.cid = c.id; renderSide(); openMsgs(); applyStage(); }, null, badgeFor([inbox["s." + view.sid + "." + c.id]].filter(Boolean)));
     });
     $("inv").hidden = false; $("copyInv").textContent = view.sid; $("leaveSrv").hidden = !!(s && s.ownerId === user.uid);
   } else {
     $("sideTitle").textContent = "Direct messages"; $("srvSet").hidden = true;
     $("listLabel").textContent = "People"; $("addCh").title = $("addCh").ariaLabel = "New message";
-    dms.forEach(d => { const o = d.members.find(m => m !== user.uid); item(dmName(d), view.kind === "dm" && view.id === d.id, () => go({kind: "dm", id: d.id}), av(o, dmName(d), "sm")); });
+    dms.forEach(d => { const o = d.members.find(m => m !== user.uid); item(dmName(d), view.kind === "dm" && view.id === d.id, () => go({kind: "dm", id: d.id}), av(o, dmName(d), "sm"), badgeFor([inbox["d." + d.id]].filter(Boolean))); });
     $("inv").hidden = true;
   }
   renderStage();
@@ -741,6 +799,8 @@ function openMsgs() {
   }
   $("chTitle").textContent = curPath ? title : "blah";
   linkTitle();
+  contextMembers().forEach(watchProfile);
+  { const ck = convKey(); if (curPath && ck && seen()) markRead(ck); }
   $("txt").disabled = !curPath; $("attach").disabled = !curPath; $("micBtn").disabled = !curPath;
   $("txt").placeholder = curPath ? "Message " + title : "Nothing open yet";
   if (!curPath) {
@@ -758,10 +818,11 @@ function openMsgs() {
     }
     box.append(d); return;
   }
+  const myPath = curPath;
   const q = query(collection(db, ...curPath), orderBy("createdAt", "desc"), limit(60));
   unsubMsgs = onSnapshot(q, snap => {
     lastDocs = snap.docs.map(d => ({id: d.id, ...d.data({serverTimestamps: "estimate"}), pending: d.metadata.hasPendingWrites})).reverse();
-    renderMsgs(true);
+    renderMsgs(true); backfillEmojis(myPath);
   }, fail);
 }
 
@@ -778,7 +839,7 @@ function renderMsgs(fromSnap) {
     const t = m.createdAt ? m.createdAt.toDate() : new Date();
     const joined = prev && prev.uid === m.uid && t - prev.t < 5 * 60e3;
     const row = document.createElement("div");
-    row.className = "m" + (joined ? "" : " first") + (m.pending ? " pend" : "");
+    row.className = "m" + (joined ? "" : " first") + (m.pending ? " pend" : "") + (m.mentions && m.mentions.includes(user.uid) ? " mentioned" : "");
     const time = t.toLocaleTimeString([], {hour: "numeric", minute: "2-digit"});
     if (joined) {
       const g = document.createElement("div"); g.className = "gut"; g.textContent = time; row.append(g);
@@ -795,7 +856,7 @@ function renderMsgs(fromSnap) {
     }
     if (editing && editing.id === m.id && m.uid === user.uid) c.append(editBox(path, m));
     else if (m.text) {
-      const b = document.createElement("div"); b.className = "body"; b.append(richText(m.text, m.emojis));
+      const b = document.createElement("div"); b.className = "body"; b.append(richText(m.text, m.emojis, mentionRe(m)));
       if (m.edited) { const e = document.createElement("span"); e.className = "edited"; e.textContent = " (edited)"; b.append(e); }
       c.append(b);
     }
@@ -809,7 +870,7 @@ function renderMsgs(fromSnap) {
     const rx = document.createElement("div"); rx.className = "rx";
     const rkeys = Object.keys(m.reactions || {}).sort((a, b) => (a in EMOJI ? 0 : 1) - (b in EMOJI ? 0 : 1));
     for (const k of rkeys) {
-      const who = m.reactions[k] || [], node = reactionNode(k);
+      const who = m.reactions[k] || [], node = reactionNode(k, m);
       if (!who.length || !node) continue;
       const b = document.createElement("button"); b.type = "button";
       b.className = who.includes(user.uid) ? "me" : ""; b.append(node, document.createTextNode(" " + who.length));
@@ -827,7 +888,7 @@ function renderMsgs(fromSnap) {
           const e = document.createElement("button"); e.type = "button"; e.textContent = EMOJI[k];
           e.onclick = () => react(path, m, k); pk.append(e);
         }
-        for (const nm of Object.keys(emojis).filter(k => emojis[k]._scope === "server").sort()) {
+        for (const nm of Object.keys(emojis).sort()) {
           const e = document.createElement("button"); e.type = "button"; e.title = ":" + nm + ":"; e.append(emojiImg(nm, false));
           e.onclick = () => react(path, m, "e_" + nm); pk.append(e);
         }
@@ -909,12 +970,15 @@ $("f").onsubmit = async e => {
   e.preventDefault();
   const text = $("txt").value.trim(), img = attach;
   if ((!text && !img) || !user || !curPath) return;
-  $("txt").value = ""; attach = null; showPrev();
+  $("txt").value = ""; attach = null; showPrev(); closeMp();
   const msg = {text, uid: user.uid, name: me, createdAt: serverTimestamp()};
   const emb = embedEmojis(text); if (Object.keys(emb).length) msg.emojis = emb;
+  const mn = findMentions(text); if (mn.length) msg.mentions = mn;
+  const ctx = convContext();
   if (img) Object.assign(msg, {image: img.data, w: img.w, h: img.h});
   try {
     await addDoc(collection(db, ...curPath), msg);
+    notifyOthers(ctx, {text, image: !!img, mentions: mn});
     const box = $("msgs"); box.scrollTop = box.scrollHeight;
   } catch (err) { alert("Send failed: " + err.message); $("txt").value = text; attach = img; showPrev(); }
 };
@@ -923,13 +987,16 @@ function emojiImg(name, big, src) {
   const i = document.createElement("img"); i.className = "emoji" + (big ? " big" : "");
   i.src = src || emojis[name].image; i.alt = i.title = ":" + name + ":"; return i;
 }
-function reactionNode(k) {
+function reactionNode(k, m) {
   if (EMOJI[k]) return document.createTextNode(EMOJI[k]);
   const nm = k.startsWith("e_") ? k.slice(2) : "";
-  return emojis[nm] && isImg(emojis[nm].image) ? emojiImg(nm, false) : null;
+  if (!nm) return null;
+  const s = (m && m.remojis && isImg(m.remojis[nm]) && m.remojis[nm]) || (m && m.emojis && isImg(m.emojis[nm]) && m.emojis[nm])
+    || (emojis[nm] && isImg(emojis[nm].image) && emojis[nm].image) || "";
+  return s ? emojiImg(nm, false, s) : null;
 }
 // turns :name: into the matching custom emoji; a message made only of emojis gets shown big
-function richText(text, emb) {
+function richText(text, emb, mre) {
   const src = n => (emb && isImg(emb[n]) && emb[n]) || (emojis[n] && isImg(emojis[n].image) && emojis[n].image) || null;
   const re = /:([a-z0-9_]{2,24}):/g, parts = [];
   let last = 0, m;
@@ -940,8 +1007,29 @@ function richText(text, emb) {
   parts.push({t: text.slice(last)});
   const n = parts.filter(x => x.e).length, big = n > 0 && n <= 6 && !parts.some(x => x.t && x.t.trim());
   const frag = document.createDocumentFragment();
-  for (const x of parts) { if (x.e) frag.append(emojiImg(x.e, big, x.s)); else if (x.t) frag.append(document.createTextNode(x.t)); }
+  for (const x of parts) { if (x.e) frag.append(emojiImg(x.e, big, x.s)); else if (x.t) frag.append(mre ? mentionNodes(x.t, mre) : document.createTextNode(x.t)); }
   return frag;
+}
+// Messages/reactions made before emojis were embedded only have the :name:. Their author's own app can still see the
+// private emoji, so it quietly attaches the picture (no "edited" mark), which lets everyone else see it too.
+const backfilled = new Set();
+function backfillEmojis(path) {
+  if (!path || path !== curPath || !user) return;
+  let n = 0;
+  for (const m of lastDocs) {
+    if (n >= 25 || !m.id) break;
+    const ref = () => doc(db, ...path, m.id);
+    if (m.uid === user.uid && m.text && !backfilled.has(m.id)) {
+      const have = m.emojis || {}, emb = embedEmojis(m.text, have);
+      if (Object.keys(emb).length > Object.keys(have).length) { backfilled.add(m.id); n++; updateDoc(ref(), {emojis: emb}).catch(() => {}); }
+    }
+    for (const k of Object.keys(m.reactions || {})) {
+      if (!k.startsWith("e_") || !(m.reactions[k] || []).includes(user.uid)) continue;
+      const nm = k.slice(2), e = emojis[nm], key = m.id + ":" + nm;
+      if (backfilled.has(key) || (m.remojis && isImg(m.remojis[nm])) || !e || e._scope !== "me" || !isImg(e.image) || e.image.length > 60000) continue;
+      backfilled.add(key); n++; updateDoc(ref(), {["remojis." + nm]: e.image}).catch(() => {});
+    }
+  }
 }
 // private emojis travel inside the message so everyone can see them (they just can't pick them)
 function embedEmojis(text, prev = {}) {
@@ -1340,56 +1428,339 @@ function editBox(path, m) {
 
 const THEMES = {
   blah:   {name: "Blah",          light: false, sw: ["#232428", "#ee3f65"]},
+  light:  {name: "Light",         light: true,  sw: ["#ffffff", "#ee3f65"]},
   pastel: {name: "Pastel Pink",   light: true,  sw: ["#fdeaf1", "#f48fb1"]},
   galaxy: {name: "Galaxy Purple", light: false, sw: ["#1b1133", "#8b5cf6"]},
   ocean:  {name: "Ocean",         light: false, sw: ["#102131", "#2d9cdb"]},
   mint:   {name: "Mint",          light: true,  sw: ["#e8f9f0", "#5fd1a0"]},
   sunset: {name: "Sunset",        light: false, sw: ["#291717", "#ff7a45"]}
 };
-let theme = "blah", accent = "";
+// every color of the interface that can be customized: [key, css variable, label]
+const PALETTE = [
+  ["bg3", "--bg3", "Main background"], ["bg2", "--bg2", "Sidebar"], ["bg1", "--bg1", "Server bar & inputs"],
+  ["txt", "--txt", "Text"], ["mut", "--mut", "Muted text"], ["line", "--line", "Borders"],
+  ["brand", "--brand", "Accent"], ["brand2", "--brand2", "Accent text & links"], ["onbrand", "--onbrand", "Text on accent"],
+  ["gA", "--gA", "Login gradient (start)"], ["gB", "--gB", "Login gradient (end)"]
+];
 const rgbOf = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
 const mixHex = (a, b, t) => "#" + rgbOf(a).map((x, i) => Math.round(x + (rgbOf(b)[i] - x) * t).toString(16).padStart(2, "0")).join("");
+const lum = h => { const [r, g, b] = rgbOf(h); return (0.299 * r + 0.587 * g + 0.114 * b) / 255; };
+const rgba = (h, a) => { const [r, g, b] = rgbOf(h); return `rgba(${r},${g},${b},${a})`; };
+const toHex6 = s => { s = (s || "").trim(); const m = /^#([0-9a-f]{3})$/i.exec(s); return m ? "#" + [...m[1]].map(c => c + c).join("") : isHex(s) ? s.toLowerCase() : "#000000"; };
+const cleanCustom = c => { const o = {}; for (const [k] of PALETTE) if (c && isHex(c[k])) o[k] = c[k].toLowerCase(); return o; };
+const UI_DEFAULT = () => ({theme: "blah", custom: {}, bg: "", veil: 70, notify: "all", sound: true});
+let ui = UI_DEFAULT(), prefsChecked = false, prefsExists = false, fbDone = false, lastEdit = 0;
+const lightUI = () => isHex(ui.custom.bg3) ? lum(ui.custom.bg3) > 0.55 : !!THEMES[ui.theme].light;
+const isNonDefault = () => ui.theme !== "blah" || Object.keys(ui.custom).length > 0 || !!ui.bg || ui.notify !== "all" || ui.sound === false;
 
-function applyTheme(id, acc) {
-  if (!THEMES[id]) id = "blah";
-  theme = id; accent = isHex(acc) ? acc.toLowerCase() : "";
-  const root = document.documentElement;
-  root.dataset.theme = id;
-  ["--brand", "--brand2", "--onbrand"].forEach(k => root.style.removeProperty(k));
-  if (accent) {
-    const [r, g, b] = rgbOf(accent);
-    root.style.setProperty("--brand", accent);
-    root.style.setProperty("--brand2", mixHex(accent, THEMES[id].light ? "#000000" : "#ffffff", 0.35));
-    root.style.setProperty("--onbrand", (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.62 ? "#1a1a1a" : "#ffffff");
+function applyUI() {
+  if (!THEMES[ui.theme]) ui.theme = "blah";
+  const root = document.documentElement, st = root.style, c = ui.custom;
+  root.dataset.theme = ui.theme;
+  [...PALETTE.map(x => x[1]), "--panel", "--edge", "--field", "--hover", "--glow1", "--glow2", "--veil", "color-scheme"].forEach(k => st.removeProperty(k));
+  for (const [k, v] of PALETTE) if (isHex(c[k])) st.setProperty(v, c[k]);
+  if (isHex(c.brand)) {                       // anything not picked by hand is worked out from the accent
+    if (!isHex(c.brand2)) st.setProperty("--brand2", mixHex(c.brand, lightUI() ? "#000000" : "#ffffff", 0.35));
+    if (!isHex(c.onbrand)) st.setProperty("--onbrand", lum(c.brand) > 0.62 ? "#1a1a1a" : "#ffffff");
+    st.setProperty("--glow1", rgba(c.brand, 0.4)); st.setProperty("--glow2", rgba(mixHex(c.brand, "#000000", 0.5), 0.5));
   }
-  try { localStorage.setItem("blah.theme", theme); localStorage.setItem("blah.accent", accent); } catch {}
-  $("accent").value = accent || THEMES[id].sw[1];
-  renderThemeCards(); refresh();
+  if (isHex(c.bg2)) st.setProperty("--panel", rgba(c.bg2, 0.9));
+  if (isHex(c.bg1)) st.setProperty("--field", rgba(c.bg1, 0.6));
+  if (isHex(c.txt)) { st.setProperty("--hover", rgba(c.txt, 0.05)); st.setProperty("--edge", rgba(c.txt, 0.14)); }
+  if (isHex(c.bg3)) st.setProperty("color-scheme", lum(c.bg3) > 0.55 ? "light" : "dark");
+  const has = isImg(ui.bg);
+  root.classList.toggle("has-bg", has);
+  $("bgimg").style.backgroundImage = has ? `url("${ui.bg}")` : "";
+  st.setProperty("--veil", ui.veil + "%");
+  try {
+    localStorage.setItem("blah.theme", ui.theme);
+    localStorage.setItem("blah.ui", JSON.stringify({theme: ui.theme, custom: ui.custom, veil: ui.veil, notify: ui.notify, sound: ui.sound}));
+    if (has) localStorage.setItem("blah.bg", ui.bg); else localStorage.removeItem("blah.bg");
+  } catch {}
+  syncPalette(); renderThemeCards(); renderNotify(); updateBadges(); refresh();
 }
-function saveTheme() {
-  if (user) setDoc(doc(db, "users", user.uid), {theme, accent}, {merge: true}).catch(() => {});
+function saveUI() {
+  lastEdit = Date.now();
+  if (user) setDoc(doc(db, "users", user.uid, "prefs", "ui"), {theme: ui.theme, custom: ui.custom, bg: ui.bg, veil: ui.veil, notify: ui.notify, sound: ui.sound}).catch(() => {});
+}
+function buildPalette() {
+  const box = $("pal");
+  for (const [k, v, label] of PALETTE) {
+    const l = document.createElement("label"), i = document.createElement("input");
+    i.type = "color"; i.dataset.k = k; i.dataset.v = v; i.setAttribute("aria-label", label);
+    i.oninput = () => { lastEdit = Date.now(); ui.custom[k] = i.value; applyUI(); };
+    i.onchange = saveUI;
+    l.append(i, document.createTextNode(label)); box.append(l);
+  }
+}
+function syncPalette() {
+  const cs = getComputedStyle(document.documentElement);
+  document.querySelectorAll("#pal input").forEach(i => { i.value = isHex(ui.custom[i.dataset.k]) ? ui.custom[i.dataset.k] : toHex6(cs.getPropertyValue(i.dataset.v)); });
+  $("veil").value = ui.veil;
 }
 function renderThemeCards() {
   const box = $("themes"); box.innerHTML = "";
   for (const id of Object.keys(THEMES)) {
-    const t = THEMES[id], b = document.createElement("button"); b.type = "button"; b.className = "tcard" + (id === theme ? " on" : "");
+    const t = THEMES[id], b = document.createElement("button"); b.type = "button"; b.className = "tcard" + (id === ui.theme ? " on" : "");
     const sw = document.createElement("span"); sw.className = "tsw"; sw.style.background = `linear-gradient(135deg, ${t.sw[0]} 50%, ${t.sw[1]} 50%)`;
     b.append(sw, document.createTextNode(t.name));
-    b.onclick = () => { applyTheme(id, accent); saveTheme(); };
+    b.onclick = () => { ui.theme = id; ui.custom = {}; applyUI(); saveUI(); };   // picking a preset starts its colors fresh
     box.append(b);
   }
 }
-$("setBtn").onclick = () => { $("acct").textContent = "Signed in as @" + me; renderThemeCards(); $("stdlg").showModal(); };
+$("setBtn").onclick = () => { $("acct").textContent = "Signed in as @" + me; syncPalette(); renderThemeCards(); $("stdlg").showModal(); };
 $("stClose").onclick = () => $("stdlg").close();
-$("accent").oninput = e => applyTheme(theme, e.target.value);
-$("accent").onchange = saveTheme;
-$("accReset").onclick = () => { applyTheme(theme, ""); saveTheme(); };
 $("stProfile").onclick = () => { $("stdlg").close(); openProfile(user.uid, me); };
-{
-  let t = "", a = "";
-  try { t = localStorage.getItem("blah.theme") || ""; a = localStorage.getItem("blah.accent") || ""; } catch {}
-  applyTheme(t, a);
+$("palReset").onclick = () => { ui.custom = {}; applyUI(); saveUI(); };
+$("veil").oninput = e => { lastEdit = Date.now(); ui.veil = +e.target.value; applyUI(); };
+$("veil").onchange = saveUI;
+$("bgPick").onclick = () => $("bgFile").click();
+$("bgClear").onclick = () => { ui.bg = ""; applyUI(); saveUI(); $("bgMsg").textContent = "Background removed."; };
+$("bgFile").onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  try {
+    let r = await shrink(f, 1600);
+    if (r.data.length > 790000) r = await shrink(f, 1000);
+    if (r.data.length > 790000) throw new Error("That image is too big even after shrinking. Try a smaller one.");
+    ui.bg = r.data; applyUI(); saveUI(); $("bgMsg").textContent = "Background set.";
+  } catch (err) { $("bgMsg").textContent = err.message; }
+};
+// your look follows you across devices (stored privately in your own prefs document)
+function watchPrefs(uid) {
+  unsubs.push(onSnapshot(doc(db, "users", uid, "prefs", "ui"), snap => {
+    prefsChecked = true; prefsExists = snap.exists();
+    if (!snap.exists()) { if (isNonDefault()) saveUI(); return; }
+    if (Date.now() - lastEdit < 2500) return;
+    const d = snap.data();
+    const next = {theme: THEMES[d.theme] ? d.theme : "blah", custom: cleanCustom(d.custom), bg: isImg(d.bg) ? d.bg : "", veil: Number.isFinite(d.veil) ? d.veil : 70, notify: ["all", "mentions", "none"].includes(d.notify) ? d.notify : "all", sound: d.sound !== false};
+    if (JSON.stringify(next) !== JSON.stringify(ui)) { ui = next; applyUI(); }
+  }, () => {}));
 }
+buildPalette();
+{
+  let j = null, t = "", a = "", bg = "";
+  try { j = JSON.parse(localStorage.getItem("blah.ui") || "null"); t = localStorage.getItem("blah.theme") || ""; a = localStorage.getItem("blah.accent") || ""; bg = localStorage.getItem("blah.bg") || ""; } catch {}
+  ui = j ? {...UI_DEFAULT(), theme: THEMES[j.theme] ? j.theme : "blah", custom: cleanCustom(j.custom), veil: Number.isFinite(j.veil) ? j.veil : 70, bg: isImg(bg) ? bg : "", notify: ["all", "mentions", "none"].includes(j.notify) ? j.notify : "all", sound: j.sound !== false}
+         : {...UI_DEFAULT(), theme: THEMES[t] ? t : "blah", custom: isHex(a) ? {brand: a.toLowerCase()} : {}, bg: isImg(bg) ? bg : ""};
+  applyUI();
+}
+
+/* ---------- @tags + notifications ---------- */
+const convKey = () => !view ? "" : view.kind === "server" && view.cid ? "s." + view.sid + "." + view.cid : view.kind === "dm" ? "d." + view.id : "";
+const seen = () => document.visibilityState === "visible" && document.hasFocus();
+function contextMembers() {
+  if (!view) return [];
+  if (view.kind === "server") { const s = servers.find(x => x.id === view.sid); return s ? s.members : []; }
+  if (view.kind === "dm") { const d = dms.find(x => x.id === view.id); return d ? d.members : []; }
+  return [];
+}
+function convContext() {
+  const conv = convKey(); if (!conv || !user) return null;
+  if (view.kind === "server") {
+    const s = servers.find(x => x.id === view.sid), c = chans.find(x => x.id === view.cid);
+    return {conv, kind: "server", sid: view.sid, cid: view.cid, recips: s ? s.members.filter(u => u !== user.uid) : [], label: "#" + (c ? c.name : view.cid) + (s ? " · " + s.name : "")};
+  }
+  const d = dms.find(x => x.id === view.id);
+  return {conv, kind: "dm", dmId: view.id, recips: d ? d.members.filter(u => u !== user.uid) : [], label: ""};
+}
+
+// who did this message tag? matches @username or @display name (any case) for people in this conversation
+function findMentions(text) {
+  if (!text.includes("@")) return [];
+  const low = text.toLowerCase(), out = new Set();
+  for (const uid of contextMembers()) {
+    if (uid === user.uid || !profiles[uid]) continue;
+    for (const nm of [profiles[uid].name, profiles[uid].displayName].filter(Boolean).map(n => "@" + n.toLowerCase())) {
+      let i = low.indexOf(nm);
+      while (i !== -1) {
+        const after = low[i + nm.length];
+        if (!after || !/[a-z0-9_]/.test(after)) { out.add(uid); break; }
+        i = low.indexOf(nm, i + 1);
+      }
+    }
+  }
+  return [...out].slice(0, 10);
+}
+function mentionRe(m) {
+  if (!m.mentions || !m.mentions.length) return null;
+  const names = [];
+  for (const uid of m.mentions) { watchProfile(uid); const pr = profiles[uid]; if (pr) { if (pr.name) names.push(pr.name); if (pr.displayName) names.push(pr.displayName); } }
+  if (!names.length) return null;
+  names.sort((a, b) => b.length - a.length);
+  return new RegExp("(@(?:" + names.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + "))(?![A-Za-z0-9_])", "gi");
+}
+function mentionNodes(t, re) {
+  const frag = document.createDocumentFragment();
+  t.split(re).forEach((part, i) => {
+    if (!part) return;
+    if (i % 2) { const s = document.createElement("span"); s.className = "mention"; s.textContent = part; frag.append(s); }
+    else frag.append(document.createTextNode(part));
+  });
+  return frag;
+}
+
+// every recipient gets one small "inbox" entry per conversation (unread count + latest message), not a copy of each message
+async function notifyOthers(ctx, info) {
+  if (!ctx || !ctx.recips.length) return;
+  const snippet = (info.text || (info.image ? "📷 Image" : info.audio ? "🎤 Voice message" : "")).slice(0, 100);
+  const b = writeBatch(db);
+  for (const r of ctx.recips.slice(0, 200)) {
+    const hit = (info.mentions || []).includes(r);
+    const d = {kind: ctx.kind, sid: ctx.sid || null, cid: ctx.cid || null, dmId: ctx.dmId || null, label: ctx.label,
+      from: user.uid, fromName: shown(user.uid, me), snippet, at: serverTimestamp(), unread: increment(1), lm: hit};
+    if (hit) d.mention = true;
+    b.set(doc(db, "users", r, "inbox", ctx.conv), d, {merge: true});
+  }
+  try { await b.commit(); } catch {}
+}
+
+// badges: DMs always count; in servers "All" counts every message, "Tags only" counts channels where you were tagged
+function badgeFor(entries) {
+  let n = 0, hot = false;
+  for (const d of entries) {
+    if (!d || !(d.unread > 0) || ui.notify === "none") continue;
+    if (d.kind === "dm") { n += d.unread; hot = true; }
+    else if (ui.notify === "all") { n += d.unread; if (d.mention) hot = true; }
+    else if (d.mention) { n += 1; hot = true; }
+  }
+  return n ? {t: n > 99 ? "99+" : String(n), hot} : null;
+}
+function setBadge(el, info) {
+  const old = el.querySelector(":scope > .bdg"); if (old) old.remove();
+  if (!info) return;
+  const s = document.createElement("span"); s.className = "bdg" + (info.hot ? "" : " soft"); s.textContent = info.t; s.setAttribute("aria-label", info.t + " unread");
+  el.append(s);
+}
+function updateBadges() {
+  if (!view) return;
+  renderRail(); renderSide();
+  const b = badgeFor(Object.values(inbox)); document.title = (b ? "(" + b.t + ") " : "") + "blah";
+}
+function markRead(conv) {
+  const d = inbox[conv]; if (!d || !user || (!(d.unread > 0) && !d.mention)) return;
+  inbox[conv] = {...d, unread: 0, mention: false};
+  updateDoc(doc(db, "users", user.uid, "inbox", conv), {unread: 0, mention: false}).catch(() => {});
+  updateBadges();
+}
+
+let pingCtx = null;
+function ping() {
+  try {
+    pingCtx = pingCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (pingCtx.state === "suspended") pingCtx.resume();
+    const t = pingCtx.currentTime, o = pingCtx.createOscillator(), g = pingCtx.createGain();
+    o.type = "sine"; o.frequency.setValueAtTime(880, t); o.frequency.setValueAtTime(1175, t + 0.09);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.18, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
+    o.connect(g); g.connect(pingCtx.destination); o.start(t); o.stop(t + 0.3);
+  } catch {}
+}
+document.addEventListener("click", () => { try { pingCtx = pingCtx || new (window.AudioContext || window.webkitAudioContext)(); pingCtx.resume(); } catch {} }, {once: true});
+function toast(title, body, onClick) {
+  const box = $("toasts"), t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", "status");
+  const b = document.createElement("b"); b.textContent = title; const s = document.createElement("span"); s.textContent = body;
+  t.append(b, s); t.onclick = () => { t.remove(); if (onClick) onClick(); };
+  box.append(t); setTimeout(() => t.remove(), 6000);
+  while (box.children.length > 4) box.firstChild.remove();
+}
+function sysNotify(id, d, title, body) {
+  if (!("Notification" in window) || Notification.permission !== "granted") return false;
+  try { const n = new Notification(title, {body, tag: id}); n.onclick = () => { window.focus(); openConv(d); n.close(); }; return true; } catch { return false; }
+}
+function openConv(d) {
+  if (d.kind === "dm" && d.dmId) go({kind: "dm", id: d.dmId});
+  else if (d.sid && servers.some(s => s.id === d.sid)) go({kind: "server", sid: d.sid, cid: d.cid});
+  $("nav").classList.remove("open");
+}
+const wantsAlert = d => ui.notify === "all" || (ui.notify === "mentions" && (d.kind === "dm" || d.lm === true));
+function alertFor(id, d) {
+  if (!wantsAlert(d) || (id === convKey() && seen())) return;
+  const where = d.label ? " in " + d.label : "";
+  const title = d.kind === "dm" ? d.fromName : d.lm ? d.fromName + " tagged you" + where : d.fromName + (d.label ? " · " + d.label : "");
+  if (ui.sound) ping();
+  if (seen()) toast(title, d.snippet || "", () => openConv(d)); else sysNotify(id, d, title, d.snippet || "");
+}
+function watchInbox(uid) {
+  unsubs.push(onSnapshot(collection(db, "users", uid, "inbox"), snap => {
+    const first = !inboxReady;
+    snap.docChanges().forEach(ch => {
+      const id = ch.doc.id;
+      if (ch.type === "removed") { delete inbox[id]; return; }
+      const d = ch.doc.data({serverTimestamps: "estimate"}), prev = inbox[id];
+      inbox[id] = d;
+      if (!first && (d.unread || 0) > (prev ? prev.unread || 0 : 0)) alertFor(id, d);
+    });
+    inboxReady = true;
+    const cur = convKey(); if (cur && inbox[cur] && inbox[cur].unread > 0 && seen()) markRead(cur);
+    updateBadges();
+  }, () => {}));
+}
+const backToView = () => { const ck = convKey(); if (ck && seen()) markRead(ck); };
+document.addEventListener("visibilitychange", backToView);
+addEventListener("focus", backToView);
+
+function renderNotify() {
+  const box = $("nmodes"); if (!box) return; box.innerHTML = "";
+  for (const [id, name, hint] of [["all", "All notifications", "Every message"], ["mentions", "Tags only", "@tags and DMs"], ["none", "Mute all", "No alerts or badges"]]) {
+    const b = document.createElement("button"); b.type = "button"; b.className = "tcard" + (ui.notify === id ? " on" : "");
+    const d = document.createElement("div"); d.textContent = name;
+    const s = document.createElement("div"); s.className = "small"; s.style.cssText = "font-weight:400;margin:0"; s.textContent = hint; d.append(s);
+    b.append(d); b.onclick = () => { ui.notify = id; applyUI(); saveUI(); }; box.append(b);
+  }
+  $("nsound").checked = ui.sound !== false;
+  const sup = "Notification" in window, perm = sup ? Notification.permission : "denied";
+  $("nperm").hidden = !sup || perm === "granted";
+  $("npermMsg").textContent = !sup ? "Desktop notifications aren't supported in this browser." : perm === "granted" ? "Desktop notifications are on." : perm === "denied" ? "Blocked. Allow them in your browser's site settings." : "";
+}
+$("nsound").onchange = () => { ui.sound = $("nsound").checked; applyUI(); saveUI(); if (ui.sound) ping(); };
+$("nperm").onclick = async () => { try { await Notification.requestPermission(); } catch {} renderNotify(); };
+
+// typing @ suggests people from this conversation
+let mp = {open: false, items: [], idx: 0, start: 0};
+function closeMp() { mp.open = false; $("mpop").hidden = true; }
+function drawMp() {
+  const box = $("mpop"); box.innerHTML = "";
+  mp.items.forEach((it, i) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "mi" + (i === mp.idx ? " on" : ""); b.setAttribute("role", "option");
+    const n = document.createElement("span"); n.textContent = it.dn || it.name;
+    const u = document.createElement("span"); u.className = "small"; u.textContent = "@" + it.name;
+    b.append(av(it.uid, it.dn || it.name, "sm"), n, u);
+    b.onpointerdown = e => { e.preventDefault(); pickMention(i); };
+    box.append(b);
+  });
+  box.hidden = false;
+}
+function updateMp() {
+  const inp = $("txt"); if (inp.disabled || !user) return closeMp();
+  const pos = inp.selectionStart ?? inp.value.length, m = /(^|\s)@([^\s@]{0,24})$/.exec(inp.value.slice(0, pos));
+  if (!m) return closeMp();
+  const q = m[2].toLowerCase(), start = pos - m[2].length - 1, list = [];
+  for (const uid of contextMembers()) {
+    if (uid === user.uid) continue;
+    watchProfile(uid); const pr = profiles[uid]; if (!pr || !pr.name) continue;
+    const dn = pr.displayName || "";
+    if (!q || pr.name.toLowerCase().includes(q) || dn.toLowerCase().includes(q)) list.push({uid, name: pr.name, dn});
+  }
+  const starts = x => x.name.toLowerCase().startsWith(q) || x.dn.toLowerCase().startsWith(q);
+  list.sort((a, b) => (starts(b) - starts(a)) || a.name.localeCompare(b.name));
+  if (!list.length) return closeMp();
+  mp = {open: true, items: list.slice(0, 6), idx: 0, start}; drawMp();
+}
+function pickMention(i) {
+  const it = mp.items[i]; if (!it) return;
+  const inp = $("txt"), pos = inp.selectionStart ?? inp.value.length, ins = "@" + it.name + " ";
+  inp.value = inp.value.slice(0, mp.start) + ins + inp.value.slice(pos);
+  const c = mp.start + ins.length; inp.setSelectionRange(c, c); closeMp(); inp.focus();
+}
+$("txt").addEventListener("input", updateMp);
+$("txt").addEventListener("click", updateMp);
+$("txt").addEventListener("keydown", e => {
+  if (!mp.open) return;
+  if (e.key === "ArrowDown") { e.preventDefault(); mp.idx = (mp.idx + 1) % mp.items.length; drawMp(); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); mp.idx = (mp.idx - 1 + mp.items.length) % mp.items.length; drawMp(); }
+  else if (e.key === "Enter" || e.key === "Tab") { e.preventDefault(); pickMention(mp.idx); }
+  else if (e.key === "Escape") closeMp();
+});
+$("txt").addEventListener("blur", () => setTimeout(closeMp, 150));
 
 /* ---------- profile dialog ---------- */
 const COLORS = ["#ee3f65", "#f59e0b", "#22c55e", "#14b8a6", "#3b82f6", "#8b5cf6", "#ec4899", "#64748b"];
@@ -1445,7 +1816,7 @@ $("pBanFile").onchange = async e => {
 /* ---------- name colors + voice messages ---------- */
 function readable(hex) {            // keeps a chosen name color legible on the current theme
   const [r, g, b] = rgbOf(hex), L = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  if (THEMES[theme].light) return L > 0.62 ? mixHex(hex, "#000000", 0.45) : hex;
+  if (lightUI()) return L > 0.62 ? mixHex(hex, "#000000", 0.45) : hex;
   return L < 0.38 ? mixHex(hex, "#ffffff", 0.5) : hex;
 }
 const nameColorOf = uid => { const c = profiles[uid] && profiles[uid].nameColor; return isHex(c) ? readable(c) : color(uid); };
@@ -1493,7 +1864,7 @@ async function startRec() {
   const mime = recMime(); let mr;
   try { mr = new MediaRecorder(stream, mime ? {mimeType: mime, audioBitsPerSecond: 24000} : {audioBitsPerSecond: 24000}); }
   catch (err) { stream.getTracks().forEach(t => t.stop()); return alert("Recording isn't supported in this browser: " + err.message); }
-  const r = rec = {mr, stream, chunks: [], t0: Date.now(), path: curPath, mime: mr.mimeType || mime};
+  const r = rec = {mr, stream, chunks: [], t0: Date.now(), path: curPath, ctx: convContext(), mime: mr.mimeType || mime};
   mr.ondataavailable = e => { if (e.data && e.data.size) r.chunks.push(e.data); };
   r.stopped = new Promise(res => { mr.onstop = res; });
   mr.start();
@@ -1523,6 +1894,7 @@ $("recSend").onclick = async () => {
   const data = await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(blob); });
   try {
     await addDoc(collection(db, ...r.path), {text: "", audio: data, dur, uid: user.uid, name: me, createdAt: serverTimestamp()});
+    notifyOthers(r.ctx, {audio: true, mentions: []});
     $("msgs").scrollTop = $("msgs").scrollHeight;
   } catch (err) { alert("Couldn't send the voice message: " + err.message); }
 };
@@ -1562,7 +1934,8 @@ service cloud.firestore {
     function okMsg() { return request.resource.data.uid == request.auth.uid && request.resource.data.text is string && request.resource.data.text.size() <= 2000
       && (!('image' in request.resource.data) || (request.resource.data.image is string && request.resource.data.image.size() < 850000))
       && (!('emojis' in request.resource.data) || (request.resource.data.emojis is map && request.resource.data.emojis.size() <= 6))
-      && (!('audio' in request.resource.data) || (request.resource.data.audio is string && request.resource.data.audio.size() < 900000)); }
+      && (!('audio' in request.resource.data) || (request.resource.data.audio is string && request.resource.data.audio.size() < 900000))
+      && (!('mentions' in request.resource.data) || (request.resource.data.mentions is list && request.resource.data.mentions.size() <= 10)); }
 
     match /users/{u} {
       allow read: if signedIn();
@@ -1573,6 +1946,20 @@ service cloud.firestore {
         && (!('banner' in request.resource.data) || request.resource.data.banner.size() < 100000)
         && (!('bio' in request.resource.data) || request.resource.data.bio.size() <= 120)
         && (!('nameColor' in request.resource.data) || request.resource.data.nameColor.size() <= 7);
+      match /inbox/{conv} {
+        allow read, delete: if signedIn() && request.auth.uid == u;
+        allow create: if signedIn() && (request.auth.uid == u
+          || (request.resource.data.from == request.auth.uid && request.resource.data.unread == 1
+              && request.resource.data.snippet.size() <= 200 && request.resource.data.label.size() <= 140 && request.resource.data.fromName.size() <= 40));
+        allow update: if signedIn() && (request.auth.uid == u
+          || (request.resource.data.from == request.auth.uid && request.resource.data.unread == resource.data.unread + 1
+              && request.resource.data.snippet.size() <= 200 && request.resource.data.label.size() <= 140 && request.resource.data.fromName.size() <= 40));
+      }
+      match /prefs/{id} {
+        allow read: if signedIn() && request.auth.uid == u;
+        allow write: if signedIn() && request.auth.uid == u
+          && (!('bg' in request.resource.data) || request.resource.data.bg.size() < 800000);
+      }
       match /emojis/{n} {
         allow read, delete: if signedIn() && request.auth.uid == u;
         allow create: if signedIn() && request.auth.uid == u && n.matches('[a-z0-9_]{2,24}') && request.resource.data.name == n
@@ -1624,7 +2011,8 @@ service cloud.firestore {
         match /messages/{m} {
           allow read: if inServer(s);
           allow create: if inServer(s) && okMsg();
-          allow update: if inServer(s) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions']);
+          allow update: if inServer(s) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'remojis'])
+            && (!('remojis' in request.resource.data) || (request.resource.data.remojis is map && request.resource.data.remojis.size() <= 12));
           allow update: if inServer(s) && resource.data.uid == request.auth.uid
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'edited', 'emojis'])
             && request.resource.data.text is string && request.resource.data.text.size() <= 2000
@@ -1642,7 +2030,8 @@ service cloud.firestore {
       match /messages/{m} {
         allow read: if inDm(d);
         allow create: if inDm(d) && okMsg();
-        allow update: if inDm(d) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions']);
+        allow update: if inDm(d) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'remojis'])
+          && (!('remojis' in request.resource.data) || (request.resource.data.remojis is map && request.resource.data.remojis.size() <= 12));
         allow update: if inDm(d) && resource.data.uid == request.auth.uid
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'edited', 'emojis'])
           && request.resource.data.text is string && request.resource.data.text.size() <= 2000
