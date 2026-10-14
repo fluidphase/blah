@@ -126,7 +126,7 @@ dialog .ghost{margin-top:8px}
 .empty p{max-width:440px;margin-bottom:14px}
 #chTitle.click:hover{text-decoration:underline}
 #bar{display:flex;align-items:center;gap:8px}
-#attach,#emBtn{font-size:20px;padding:6px 10px}
+#attach,#emBtn,#micBtn{font-size:20px;padding:6px 10px}
 #prev{display:flex;align-items:center;gap:10px;padding:0 0 8px}
 #prev img{height:64px;max-width:140px;object-fit:cover;border-radius:6px}
 .pic{display:block;max-width:min(100%,360px);height:auto;margin-top:4px;border-radius:8px;cursor:zoom-in}
@@ -191,6 +191,17 @@ select{background:var(--bg1);border:1px solid var(--line);border-radius:6px;padd
 .tcard.on{border-color:var(--brand)}
 .tsw{width:32px;height:32px;border-radius:50%;flex:none;border:1px solid var(--line)}
 #accent{width:56px;height:40px;padding:2px;flex:none;cursor:pointer}
+.vm{display:flex;align-items:center;gap:10px;margin-top:4px;width:min(100%,300px);padding:6px 12px 6px 6px;background:var(--bg2);border:1px solid var(--line);border-radius:22px}
+.vplay{width:32px;height:32px;border-radius:50%;padding:0;flex:none}
+.vtrack{flex:1;height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.vtrack div{height:100%;width:0;background:var(--brand)}
+.vtime{font-size:12px;color:var(--mut);min-width:34px;text-align:right}
+#recbar{display:flex;align-items:center;gap:10px;padding:0 0 4px}
+#recbar .small{flex:1;margin:0}
+#recT{font-variant-numeric:tabular-nums;font-weight:600}
+.recdot{width:10px;height:10px;border-radius:50%;background:var(--err);animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.25}}
+@media(prefers-reduced-motion:reduce){.recdot{animation:none}}
 @media(max-width:700px){
  #app{grid-template-columns:1fr}
  #nav{position:fixed;inset:0 10% 0 0;z-index:5;transform:translateX(-100%);transition:transform .2s;box-shadow:4px 0 24px #0008}
@@ -261,8 +272,10 @@ select{background:var(--bg1);border:1px solid var(--line);border-radius:6px;padd
     <div id="msgs" aria-live="polite"></div>
     <form id="f">
       <div id="prev" hidden><img id="pvImg" alt="Attached image preview"><button type="button" class="ghost" id="pvX">✕ Remove</button></div>
-      <div id="bar"><button type="button" id="attach" class="ghost" aria-label="Attach image" title="Attach image">📎</button><button type="button" id="emBtn" class="ghost" aria-label="Emojis" title="Emojis">😀</button>
+      <div id="bar"><button type="button" id="attach" class="ghost" aria-label="Attach image" title="Attach image">📎</button><button type="button" id="emBtn" class="ghost" aria-label="Emojis" title="Emojis">😀</button><button type="button" id="micBtn" class="ghost" aria-label="Record a voice message" title="Record a voice message">🎤</button>
         <input id="txt" maxlength="2000" autocomplete="off"><input type="file" id="imgFile" accept="image/*" hidden></div>
+      <div id="recbar" hidden><span class="recdot"></span><span id="recT">0:00</span><span class="small">Recording… (max 1 min)</span>
+        <button type="button" class="ghost" id="recCancel">Cancel</button><button type="button" id="recSend">Send</button></div>
     </form>
   </main>
 </div>
@@ -290,6 +303,9 @@ select{background:var(--bg1);border:1px solid var(--line);border-radius:6px;padd
     <div class="row"><button type="button" class="outline" id="pPick">Upload photo</button><button type="button" class="ghost" id="pClear">Remove photo</button></div>
     <div class="swatches" id="pColors" role="group" aria-label="Avatar color"></div>
     <input id="pDisp" maxlength="32" placeholder="Display name" aria-label="Display name">
+    <div class="sh" style="margin:6px 0 0">Name color</div>
+    <div class="swatches" id="pNameColors" role="group" aria-label="Name color"></div>
+    <div class="row"><input type="color" id="pNameCustom" aria-label="Custom name color" style="width:56px;height:40px;padding:2px;flex:none"><button type="button" class="ghost" id="pNameAuto">Auto</button></div>
     <input id="pBioIn" maxlength="120" placeholder="About you" aria-label="About you">
     <button type="button" id="pSave">Save profile</button>
   </div>
@@ -548,7 +564,7 @@ function start(u) {
   go({kind: "home"});
 }
 function stop() {
-  leaveVoice(); vunsubs.forEach(f => f()); vunsubs = []; clearInterval(staleTimer); staleTimer = 0;
+  leaveVoice(); endRec(); vunsubs.forEach(f => f()); vunsubs = []; clearInterval(staleTimer); staleTimer = 0;
   unsubs.forEach(f => f()); unsubs = []; watching.clear(); profiles = {};
   unsubChans && unsubChans(); unsubMsgs && unsubMsgs(); unsubChans = unsubMsgs = null;
   user = null; view = null; servers = []; dms = []; chans = []; curPath = null;
@@ -715,7 +731,7 @@ function openMsgs() {
   unsubMsgs && unsubMsgs(); unsubMsgs = null;
   const box = $("msgs");
   let title = "";
-  curPath = null; lastDocs = []; firstLoad = true; editing = null;
+  curPath = null; lastDocs = []; firstLoad = true; editing = null; audioCache.forEach(a => a.pause()); audioCache.clear();
   if (view.kind === "server" && view.cid) {
     const c = chans.find(x => x.id === view.cid);
     curPath = ["servers", view.sid, "channels", view.cid, "messages"]; title = "# " + (c ? c.name : view.cid);
@@ -725,7 +741,7 @@ function openMsgs() {
   }
   $("chTitle").textContent = curPath ? title : "blah";
   linkTitle();
-  $("txt").disabled = !curPath; $("attach").disabled = !curPath;
+  $("txt").disabled = !curPath; $("attach").disabled = !curPath; $("micBtn").disabled = !curPath;
   $("txt").placeholder = curPath ? "Message " + title : "Nothing open yet";
   if (!curPath) {
     box.innerHTML = "";
@@ -772,7 +788,7 @@ function renderMsgs(fromSnap) {
     const c = document.createElement("div");
     if (!joined) {
       const h = document.createElement("div");
-      const w = document.createElement("span"); w.className = "who click"; w.textContent = shown(m.uid, m.name); w.style.color = color(m.uid);
+      const w = document.createElement("span"); w.className = "who click"; w.textContent = shown(m.uid, m.name); w.style.color = nameColorOf(m.uid);
       w.onclick = () => openProfile(m.uid, m.name);
       const s = document.createElement("span"); s.className = "when"; s.textContent = t.toLocaleDateString([], {month: "short", day: "numeric"}) + ", " + time;
       h.append(w, s); c.append(h);
@@ -789,6 +805,7 @@ function renderMsgs(fromSnap) {
       im.src = m.image; im.onclick = () => { $("lImg").src = m.image; $("ldlg").showModal(); };
       c.append(im);
     }
+    if (isAudio(m.audio)) c.append(voicePlayer(m, path.join("/") + "/" + m.id));
     const rx = document.createElement("div"); rx.className = "rx";
     const rkeys = Object.keys(m.reactions || {}).sort((a, b) => (a in EMOJI ? 0 : 1) - (b in EMOJI ? 0 : 1));
     for (const k of rkeys) {
@@ -817,7 +834,7 @@ function renderMsgs(fromSnap) {
         acts.prepend(pk);
       };
       acts.append(rb);
-      if (m.uid === user.uid && !(editing && editing.id === m.id)) {
+      if (m.uid === user.uid && !m.audio && !(editing && editing.id === m.id)) {
         const ed = document.createElement("button"); ed.type = "button"; ed.textContent = "Edit"; ed.setAttribute("aria-label", "Edit message");
         ed.onclick = () => { editing = {id: m.id, value: m.text || ""}; renderMsgs(false); };
         acts.append(ed);
@@ -1347,7 +1364,7 @@ function applyTheme(id, acc) {
   }
   try { localStorage.setItem("blah.theme", theme); localStorage.setItem("blah.accent", accent); } catch {}
   $("accent").value = accent || THEMES[id].sw[1];
-  renderThemeCards();
+  renderThemeCards(); refresh();
 }
 function saveTheme() {
   if (user) setDoc(doc(db, "users", user.uid), {theme, accent}, {merge: true}).catch(() => {});
@@ -1384,13 +1401,16 @@ COLORS.forEach(c => {
 });
 function drawProfile() {
   paint($("pAv"), draft, $("pName").textContent, pUid); paintBanner($("pBanner"), draft, pUid);
+  $("pName").style.color = isHex(draft.nameColor) ? readable(draft.nameColor) : "";
+  $("pNameCustom").value = isHex(draft.nameColor) ? draft.nameColor : "#ffffff";
+  [...$("pNameColors").children].forEach(b => b.classList.toggle("on", b.dataset.c === draft.nameColor));
   [...$("pColors").children].forEach(b => b.classList.toggle("on", b.dataset.c === draft.color));
 }
 function openProfile(uid, name) {
   pUid = uid; watchProfile(uid);
   const pr = profiles[uid] || {}, mine = uid === user.uid;
   pUname = pr.name || name;
-  draft = {photo: pr.photo || "", color: pr.color || "", banner: pr.banner || ""};
+  draft = {photo: pr.photo || "", color: pr.color || "", banner: pr.banner || "", nameColor: pr.nameColor || ""};
   $("pName").textContent = pr.displayName || pUname; $("pUser").textContent = "@" + pUname; $("pDisp").value = pr.displayName || "";
   $("pBio").textContent = mine ? "" : (pr.bio || "No bio yet.");
   $("pBioIn").value = pr.bio || "";
@@ -1408,7 +1428,7 @@ $("pFile").onchange = async e => {
 };
 $("pSave").onclick = async () => {
   try {
-    await setDoc(doc(db, "users", user.uid), {displayName: $("pDisp").value.trim().slice(0, 32), photo: draft.photo, color: draft.color, banner: draft.banner, bio: $("pBioIn").value.trim().slice(0, 120)}, {merge: true});
+    await setDoc(doc(db, "users", user.uid), {displayName: $("pDisp").value.trim().slice(0, 32), nameColor: draft.nameColor, photo: draft.photo, color: draft.color, banner: draft.banner, bio: $("pBioIn").value.trim().slice(0, 120)}, {merge: true});
     $("pdlg").close();
   } catch (err) { $("pErr").textContent = err.message; }
 };
@@ -1420,6 +1440,91 @@ $("pBanClear").onclick = () => { draft.banner = ""; drawProfile(); };
 $("pBanFile").onchange = async e => {
   const f = e.target.files[0]; e.target.value = ""; if (!f) return;
   try { draft.banner = await prepImage(f, 480, 160, false); drawProfile(); } catch (err) { $("pErr").textContent = err.message; }
+};
+
+/* ---------- name colors + voice messages ---------- */
+function readable(hex) {            // keeps a chosen name color legible on the current theme
+  const [r, g, b] = rgbOf(hex), L = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  if (THEMES[theme].light) return L > 0.62 ? mixHex(hex, "#000000", 0.45) : hex;
+  return L < 0.38 ? mixHex(hex, "#ffffff", 0.5) : hex;
+}
+const nameColorOf = uid => { const c = profiles[uid] && profiles[uid].nameColor; return isHex(c) ? readable(c) : color(uid); };
+const NAME_COLORS = ["#ff6b81", "#ff9f43", "#feca57", "#7bed9f", "#2ed573", "#1dd1a1", "#48dbfb", "#54a0ff", "#a29bfe", "#c56cf0", "#f78fb3", "#b2bec3"];
+NAME_COLORS.forEach(c => {
+  const b = document.createElement("button"); b.type = "button"; b.style.background = c; b.dataset.c = c; b.setAttribute("aria-label", "Name color " + c);
+  b.onclick = () => { draft.nameColor = draft.nameColor === c ? "" : c; drawProfile(); };
+  $("pNameColors").append(b);
+});
+$("pNameCustom").oninput = e => { draft.nameColor = e.target.value; drawProfile(); };
+$("pNameAuto").onclick = () => { draft.nameColor = ""; drawProfile(); };
+
+const isAudio = s => typeof s === "string" && s.startsWith("data:audio/");
+const fmtT = s => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+const audioCache = new Map(); let playingAudio = null;
+// players are cached per message so a playing clip isn't cut off when the chat re-renders
+function voicePlayer(m, key) {
+  let a = audioCache.get(key);
+  if (!a) { a = new Audio(); a.preload = "metadata"; a.src = m.audio; audioCache.set(key, a); }
+  const w = document.createElement("div"); w.className = "vm";
+  const b = document.createElement("button"); b.type = "button"; b.className = "vplay"; b.setAttribute("aria-label", "Play or pause voice message");
+  const bar = document.createElement("div"); bar.className = "vtrack"; const fill = document.createElement("div"); bar.append(fill);
+  const t = document.createElement("span"); t.className = "vtime"; const total = m.dur || 0;
+  const draw = () => {
+    b.textContent = a.paused ? "▶" : "⏸";
+    fill.style.width = total ? Math.min(100, a.currentTime / total * 100) + "%" : "0%";
+    t.textContent = fmtT(a.paused && !a.currentTime ? total : a.currentTime);
+  };
+  a.ontimeupdate = a.onplay = a.onpause = draw;
+  a.onended = () => { a.currentTime = 0; draw(); };
+  b.onclick = () => {
+    if (a.paused) { if (playingAudio && playingAudio !== a) playingAudio.pause(); playingAudio = a; a.play().catch(() => {}); } else a.pause();
+  };
+  draw(); w.append(b, bar, t); return w;
+}
+
+let rec = null; const MAX_REC = 60;
+const recMime = () => ["audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus", "audio/mp4"].find(t => window.MediaRecorder && MediaRecorder.isTypeSupported(t)) || "";
+if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder)) $("micBtn").hidden = true;
+async function startRec() {
+  if (rec || !curPath) return;
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: true, noiseSuppression: true}}); }
+  catch (err) { return alert("Couldn't use your microphone: " + err.message); }
+  const mime = recMime(); let mr;
+  try { mr = new MediaRecorder(stream, mime ? {mimeType: mime, audioBitsPerSecond: 24000} : {audioBitsPerSecond: 24000}); }
+  catch (err) { stream.getTracks().forEach(t => t.stop()); return alert("Recording isn't supported in this browser: " + err.message); }
+  const r = rec = {mr, stream, chunks: [], t0: Date.now(), path: curPath, mime: mr.mimeType || mime};
+  mr.ondataavailable = e => { if (e.data && e.data.size) r.chunks.push(e.data); };
+  r.stopped = new Promise(res => { mr.onstop = res; });
+  mr.start();
+  $("bar").hidden = true; $("recbar").hidden = false; $("recT").textContent = "0:00";
+  r.timer = setInterval(() => {
+    const s = (Date.now() - r.t0) / 1000; $("recT").textContent = fmtT(Math.min(s, MAX_REC));
+    if (s >= MAX_REC && mr.state === "recording") mr.stop();
+  }, 250);
+}
+function endRec() {
+  if (!rec) return; const r = rec; rec = null;
+  clearInterval(r.timer);
+  try { if (r.mr.state !== "inactive") r.mr.stop(); } catch {}
+  r.stream.getTracks().forEach(t => t.stop());
+  $("bar").hidden = false; $("recbar").hidden = true;
+}
+$("micBtn").onclick = startRec;
+$("recCancel").onclick = () => endRec();
+$("recSend").onclick = async () => {
+  const r = rec; if (!r) return;
+  const dur = Math.min(MAX_REC, Math.round((Date.now() - r.t0) / 1000));
+  if (r.mr.state !== "inactive") r.mr.stop();
+  await r.stopped; endRec();
+  if (dur < 1 || !r.chunks.length) return;
+  const blob = new Blob(r.chunks, {type: r.mime || r.chunks[0].type || "audio/webm"});
+  if (blob.size > 650000) return alert("That recording is too long to send. Try a shorter one.");
+  const data = await new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = rej; fr.readAsDataURL(blob); });
+  try {
+    await addDoc(collection(db, ...r.path), {text: "", audio: data, dur, uid: user.uid, name: me, createdAt: serverTimestamp()});
+    $("msgs").scrollTop = $("msgs").scrollHeight;
+  } catch (err) { alert("Couldn't send the voice message: " + err.message); }
 };
 
 /* ---------- server settings (owner only) ---------- */
@@ -1456,7 +1561,8 @@ service cloud.firestore {
     function inDm(d) { return signedIn() && request.auth.uid in get(/databases/$(database)/documents/dms/$(d)).data.members; }
     function okMsg() { return request.resource.data.uid == request.auth.uid && request.resource.data.text is string && request.resource.data.text.size() <= 2000
       && (!('image' in request.resource.data) || (request.resource.data.image is string && request.resource.data.image.size() < 850000))
-      && (!('emojis' in request.resource.data) || (request.resource.data.emojis is map && request.resource.data.emojis.size() <= 6)); }
+      && (!('emojis' in request.resource.data) || (request.resource.data.emojis is map && request.resource.data.emojis.size() <= 6))
+      && (!('audio' in request.resource.data) || (request.resource.data.audio is string && request.resource.data.audio.size() < 900000)); }
 
     match /users/{u} {
       allow read: if signedIn();
@@ -1465,7 +1571,8 @@ service cloud.firestore {
         && (!('displayName' in request.resource.data) || request.resource.data.displayName.size() <= 32)
         && (!('photo' in request.resource.data) || request.resource.data.photo.size() < 600000)
         && (!('banner' in request.resource.data) || request.resource.data.banner.size() < 100000)
-        && (!('bio' in request.resource.data) || request.resource.data.bio.size() <= 120);
+        && (!('bio' in request.resource.data) || request.resource.data.bio.size() <= 120)
+        && (!('nameColor' in request.resource.data) || request.resource.data.nameColor.size() <= 7);
       match /emojis/{n} {
         allow read, delete: if signedIn() && request.auth.uid == u;
         allow create: if signedIn() && request.auth.uid == u && n.matches('[a-z0-9_]{2,24}') && request.resource.data.name == n
