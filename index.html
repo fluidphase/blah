@@ -135,7 +135,9 @@ dialog .ghost{margin-top:8px}
 .emoji{width:22px;height:22px;object-fit:contain;vertical-align:-5px}
 .emoji.big{width:48px;height:48px;vertical-align:middle}
 #edlg{width:min(480px,94vw)}
-.egrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:8px;max-height:44vh;overflow:auto;margin-top:12px}
+#eGrid{max-height:46vh;overflow:auto;margin-top:4px}
+.egrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:8px}
+select{background:var(--bg1);border:1px solid var(--line);border-radius:6px;padding:10px 12px;color:inherit;font:inherit;width:100%}
 .egrid .small{grid-column:1/-1}
 .eitem{position:relative;display:grid;justify-items:center;gap:4px;padding:8px 4px;background:var(--bg3);color:var(--txt);font-size:11px;font-weight:500;overflow:hidden}
 .eitem img{width:36px;height:36px;object-fit:contain}
@@ -326,11 +328,12 @@ dialog .ghost{margin-top:8px}
     <div class="row"><input id="eName" maxlength="24" placeholder="name (a-z, 0-9, _)" aria-label="Emoji name" autocapitalize="none" spellcheck="false" style="flex:1;min-width:0">
       <button type="button" class="outline" id="ePick">Choose image</button></div>
     <input type="file" id="eFile" accept="image/*" hidden>
+    <select id="eDest" aria-label="Who can use this emoji"></select>
     <div class="row"><img id="ePv" class="emoji big" alt="Emoji preview" hidden><button type="submit">Add emoji</button></div>
   </form>
   <div class="err" id="eErr" role="alert"></div>
-  <div class="small" id="eMsg">Tap an emoji to use it. Type :name: in any message.</div>
-  <div class="egrid" id="eGrid"></div>
+  <div class="small" id="eMsg">Tap an emoji to use it, or type :name: in a message. Private emojis can only be used by you, but everyone sees them in the messages you send. Server emojis can be used by everyone in that server.</div>
+  <div id="eGrid"></div>
   <button type="button" class="ghost" id="eClose">Close</button>
 </dialog>
 
@@ -383,7 +386,7 @@ let user = null, me = "";
 let servers = [], dms = [], chans = [];
 let view = null;                       // {kind:"home"} | {kind:"dm", id} | {kind:"server", sid, cid}
 let unsubs = [], unsubChans = null, unsubMsgs = null, curPath = null;
-let profiles = {}, lastDocs = [], firstLoad = true, emojis = {};
+let profiles = {}, lastDocs = [], firstLoad = true, emojis = {}, myEmojis = {}, srvEmojis = {};
 let voice = null, vparts = {}, vunsubs = [], speakingNow = new Set(), staleTimer = 0, stage = false, editing = null;
 const watching = new Set();
 
@@ -532,10 +535,15 @@ function start(u) {
     dms = snap.docs.map(d => ({id: d.id, ...d.data()}));
     renderSide();
   }, fail));
-  unsubs.push(onSnapshot(query(collection(db, "emojis"), orderBy("createdAt", "desc"), limit(300)), snap => {
-    emojis = {}; snap.forEach(d => { emojis[d.id] = d.data(); });
-    refresh(); renderEmojiGrid();
+  unsubs.push(onSnapshot(query(collection(db, "users", u.uid, "emojis"), orderBy("createdAt", "desc"), limit(200)), snap => {
+    myEmojis = {}; snap.forEach(d => { myEmojis[d.id] = d.data(); });
+    mergeEmojis(); refresh(); renderEmojiGrid();
   }, () => {}));
+  // one-time move of emojis made before emojis became private/per-server
+  getDocs(query(collection(db, "emojis"), where("uid", "==", u.uid))).then(snap => snap.forEach(async d => {
+    const e = d.data();
+    try { await setDoc(doc(db, "users", u.uid, "emojis", d.id), {name: d.id, image: e.image, createdAt: e.createdAt || serverTimestamp()}); await deleteDoc(d.ref); } catch {}
+  })).catch(() => {});
   if (!staleTimer) staleTimer = setInterval(() => { if (view && view.kind === "server") renderSide(); }, 30000);
   go({kind: "home"});
 }
@@ -544,6 +552,7 @@ function stop() {
   unsubs.forEach(f => f()); unsubs = []; watching.clear(); profiles = {};
   unsubChans && unsubChans(); unsubMsgs && unsubMsgs(); unsubChans = unsubMsgs = null;
   user = null; view = null; servers = []; dms = []; chans = []; curPath = null;
+  myEmojis = {}; srvEmojis = {}; emojis = {};
   $("app").hidden = true; $("login").hidden = false;
   $("inPass").value = ""; show("signin");
 }
@@ -551,9 +560,14 @@ function stop() {
 /* ---------- navigation ---------- */
 function go(v) {
   view = v; chans = []; stage = false;
-  vunsubs.forEach(f => f()); vunsubs = []; vparts = {};
+  vunsubs.forEach(f => f()); vunsubs = []; vparts = {}; srvEmojis = {}; mergeEmojis();
   unsubChans && unsubChans(); unsubChans = null;
   if (v.kind === "server") {
+    vunsubs.push(onSnapshot(query(collection(db, "servers", v.sid, "emojis"), orderBy("createdAt", "desc"), limit(200)), snap => {
+      if (view !== v) return;
+      srvEmojis = {}; snap.forEach(d => { srvEmojis[d.id] = d.data(); });
+      mergeEmojis(); refresh(); renderEmojiGrid();
+    }, () => {}));
     unsubChans = onSnapshot(query(collection(db, "servers", v.sid, "channels"), orderBy("createdAt")), snap => {
       if (view !== v) return;
       chans = snap.docs.map(d => ({id: d.id, ...d.data()}));
@@ -765,7 +779,7 @@ function renderMsgs(fromSnap) {
     }
     if (editing && editing.id === m.id && m.uid === user.uid) c.append(editBox(path, m));
     else if (m.text) {
-      const b = document.createElement("div"); b.className = "body"; b.append(richText(m.text));
+      const b = document.createElement("div"); b.className = "body"; b.append(richText(m.text, m.emojis));
       if (m.edited) { const e = document.createElement("span"); e.className = "edited"; e.textContent = " (edited)"; b.append(e); }
       c.append(b);
     }
@@ -796,7 +810,7 @@ function renderMsgs(fromSnap) {
           const e = document.createElement("button"); e.type = "button"; e.textContent = EMOJI[k];
           e.onclick = () => react(path, m, k); pk.append(e);
         }
-        for (const nm of Object.keys(emojis).sort()) {
+        for (const nm of Object.keys(emojis).filter(k => emojis[k]._scope === "server").sort()) {
           const e = document.createElement("button"); e.type = "button"; e.title = ":" + nm + ":"; e.append(emojiImg(nm, false));
           e.onclick = () => react(path, m, "e_" + nm); pk.append(e);
         }
@@ -880,6 +894,7 @@ $("f").onsubmit = async e => {
   if ((!text && !img) || !user || !curPath) return;
   $("txt").value = ""; attach = null; showPrev();
   const msg = {text, uid: user.uid, name: me, createdAt: serverTimestamp()};
+  const emb = embedEmojis(text); if (Object.keys(emb).length) msg.emojis = emb;
   if (img) Object.assign(msg, {image: img.data, w: img.w, h: img.h});
   try {
     await addDoc(collection(db, ...curPath), msg);
@@ -887,9 +902,9 @@ $("f").onsubmit = async e => {
   } catch (err) { alert("Send failed: " + err.message); $("txt").value = text; attach = img; showPrev(); }
 };
 /* ---------- custom emojis ---------- */
-function emojiImg(name, big) {
+function emojiImg(name, big, src) {
   const i = document.createElement("img"); i.className = "emoji" + (big ? " big" : "");
-  i.src = emojis[name].image; i.alt = i.title = ":" + name + ":"; return i;
+  i.src = src || emojis[name].image; i.alt = i.title = ":" + name + ":"; return i;
 }
 function reactionNode(k) {
   if (EMOJI[k]) return document.createTextNode(EMOJI[k]);
@@ -897,17 +912,29 @@ function reactionNode(k) {
   return emojis[nm] && isImg(emojis[nm].image) ? emojiImg(nm, false) : null;
 }
 // turns :name: into the matching custom emoji; a message made only of emojis gets shown big
-function richText(text) {
+function richText(text, emb) {
+  const src = n => (emb && isImg(emb[n]) && emb[n]) || (emojis[n] && isImg(emojis[n].image) && emojis[n].image) || null;
   const re = /:([a-z0-9_]{2,24}):/g, parts = [];
   let last = 0, m;
   while ((m = re.exec(text))) {
-    if (emojis[m[1]] && isImg(emojis[m[1]].image)) { parts.push({t: text.slice(last, m.index)}, {e: m[1]}); last = re.lastIndex; }
+    const s = src(m[1]);
+    if (s) { parts.push({t: text.slice(last, m.index)}, {e: m[1], s}); last = re.lastIndex; }
   }
   parts.push({t: text.slice(last)});
   const n = parts.filter(x => x.e).length, big = n > 0 && n <= 6 && !parts.some(x => x.t && x.t.trim());
   const frag = document.createDocumentFragment();
-  for (const x of parts) { if (x.e) frag.append(emojiImg(x.e, big)); else if (x.t) frag.append(document.createTextNode(x.t)); }
+  for (const x of parts) { if (x.e) frag.append(emojiImg(x.e, big, x.s)); else if (x.t) frag.append(document.createTextNode(x.t)); }
   return frag;
+}
+// private emojis travel inside the message so everyone can see them (they just can't pick them)
+function embedEmojis(text, prev = {}) {
+  const out = {}, re = /:([a-z0-9_]{2,24}):/g; let m, total = 0;
+  while ((m = re.exec(text)) && Object.keys(out).length < 6) {
+    const n = m[1], e = emojis[n]; if (out[n]) continue;
+    const img = isImg(prev[n]) ? prev[n] : (e && e._scope === "me" && isImg(e.image) ? e.image : "");
+    if (img && total + img.length < 700000) { out[n] = img; total += img.length; }
+  }
+  return out;
 }
 function prepEmoji(file) {
   return new Promise((res, rej) => {
@@ -931,26 +958,50 @@ function prepEmoji(file) {
 }
 
 let eData = "";
+// my emojis are private to me; server emojis are shared with everyone in that server (server ones win on a name clash)
+function mergeEmojis() {
+  emojis = {};
+  for (const k of Object.keys(myEmojis)) emojis[k] = {...myEmojis[k], _scope: "me"};
+  for (const k of Object.keys(srvEmojis)) emojis[k] = {...srvEmojis[k], _scope: "server"};
+}
 function renderEmojiGrid() {
-  const g = $("eGrid"); if (!g) return; g.innerHTML = "";
-  const names = Object.keys(emojis).sort();
-  if (!names.length) { const d = document.createElement("div"); d.className = "small"; d.textContent = "No custom emojis yet. Add the first one!"; g.append(d); return; }
-  for (const nm of names) {
-    if (!isImg(emojis[nm].image)) continue;
-    const b = document.createElement("button"); b.type = "button"; b.className = "eitem"; b.title = ":" + nm + ":" + (emojis[nm].by ? " by " + emojis[nm].by : "");
-    const s = document.createElement("span"); s.textContent = nm; b.append(emojiImg(nm, false), s);
-    b.onclick = () => pickEmoji(nm);
-    if (emojis[nm].uid === user.uid) {
-      const x = document.createElement("button"); x.type = "button"; x.className = "x"; x.textContent = "✕"; x.setAttribute("aria-label", "Delete :" + nm + ":");
-      x.onclick = async ev => {
-        ev.stopPropagation();
-        if (!confirm("Delete :" + nm + ":? Messages using it will show the plain text.")) return;
-        try { await deleteDoc(doc(db, "emojis", nm)); } catch (err) { $("eErr").textContent = err.message; }
-      };
-      b.append(x);
+  const g = $("eGrid"); if (!g || !user) return; g.innerHTML = "";
+  const srv = view && view.kind === "server" ? servers.find(x => x.id === view.sid) : null;
+  const section = (title, hint, map, canDelete, docRef) => {
+    const h = document.createElement("div"); h.className = "sh"; h.textContent = title; g.append(h);
+    const grid = document.createElement("div"); grid.className = "egrid"; g.append(grid);
+    const names = Object.keys(map).filter(k => isImg(map[k].image)).sort();
+    if (!names.length) { const d = document.createElement("div"); d.className = "small"; d.textContent = hint; grid.append(d); return; }
+    for (const nm of names) {
+      const data = map[nm];
+      const b = document.createElement("button"); b.type = "button"; b.className = "eitem"; b.title = ":" + nm + ":" + (data.by ? " by " + data.by : "");
+      const im = document.createElement("img"); im.src = data.image; im.alt = ":" + nm + ":";
+      const s = document.createElement("span"); s.textContent = nm; b.append(im, s);
+      b.onclick = () => pickEmoji(nm);
+      if (canDelete(data)) {
+        const x = document.createElement("button"); x.type = "button"; x.className = "x"; x.textContent = "✕"; x.setAttribute("aria-label", "Delete :" + nm + ":");
+        x.onclick = async ev => {
+          ev.stopPropagation();
+          if (!confirm("Delete :" + nm + ":? Messages using it will show the plain text.")) return;
+          try { await deleteDoc(docRef(nm)); } catch (err) { $("eErr").textContent = err.message; }
+        };
+        b.append(x);
+      }
+      grid.append(b);
     }
-    g.append(b);
+  };
+  section("My emojis (only you can use these)", "None yet. Add one above.", myEmojis, () => true, nm => doc(db, "users", user.uid, "emojis", nm));
+  if (srv) {
+    const sid = srv.id, owner = srv.ownerId === user.uid;
+    section(srv.name + " (everyone in this server)", "None yet. Add one above and choose this server.", srvEmojis,
+      d => owner || d.uid === user.uid, nm => doc(db, "servers", sid, "emojis", nm));
   }
+}
+function fillDest() {
+  const sel = $("eDest"), s = view && view.kind === "server" ? servers.find(x => x.id === view.sid) : null, prev = sel.value;
+  sel.innerHTML = ""; sel.append(new Option("Only me (private)", "me"));
+  if (s) sel.append(new Option("Everyone in " + s.name, "server"));
+  sel.value = [...sel.options].some(o => o.value === prev) ? prev : "me";
 }
 async function pickEmoji(name) {
   const t = ":" + name + ":", i = $("txt");
@@ -963,7 +1014,7 @@ async function pickEmoji(name) {
     catch { $("eMsg").textContent = "Type " + t + " in a message to use it."; }
   }
 }
-const openEmojis = () => { $("eErr").textContent = ""; renderEmojiGrid(); $("edlg").showModal(); };
+const openEmojis = () => { $("eErr").textContent = ""; fillDest(); renderEmojiGrid(); $("edlg").showModal(); };
 $("emojiBtn").onclick = $("emBtn").onclick = openEmojis;
 $("eClose").onclick = () => $("edlg").close();
 $("ePick").onclick = () => $("eFile").click();
@@ -979,11 +1030,13 @@ $("ef").onsubmit = async e => {
   const name = $("eName").value.trim().toLowerCase();
   if (!/^[a-z0-9_]{2,24}$/.test(name)) return $("eErr").textContent = "Name: 2–24 letters, numbers or underscores.";
   if (!eData) return $("eErr").textContent = "Choose an image first.";
-  if (emojis[name]) return $("eErr").textContent = "That name is taken. Try another.";
+  const toServer = $("eDest").value === "server" && view && view.kind === "server";
+  if ((toServer ? srvEmojis : myEmojis)[name]) return $("eErr").textContent = toServer ? "That name is taken in this server." : "You already have an emoji with that name.";
   try {
-    await setDoc(doc(db, "emojis", name), {name, image: eData, uid: user.uid, by: me, createdAt: serverTimestamp()});
+    if (toServer) await setDoc(doc(db, "servers", view.sid, "emojis", name), {name, image: eData, uid: user.uid, by: me, createdAt: serverTimestamp()});
+    else await setDoc(doc(db, "users", user.uid, "emojis", name), {name, image: eData, createdAt: serverTimestamp()});
     eData = ""; $("eName").value = ""; $("ePv").hidden = true; $("eErr").textContent = "";
-    $("eMsg").textContent = "Added :" + name + ":";
+    $("eMsg").textContent = "Added :" + name + (toServer ? ": for everyone in this server" : ": (private: only you can use it)");
   } catch (err) { $("eErr").textContent = err.code === "permission-denied" ? "Couldn't save. The name may be taken, or the Firestore rules need updating." : err.message; }
 };
 
@@ -1253,7 +1306,7 @@ function editBox(path, m) {
     const t = i.value.trim(); if (!t && !m.image) return;
     editing = null;
     if (t !== (m.text || "")) {
-      try { await updateDoc(doc(db, ...path, m.id), {text: t, edited: true}); } catch (err) { alert("Couldn't edit: " + err.message); }
+      try { await updateDoc(doc(db, ...path, m.id), {text: t, edited: true, emojis: embedEmojis(t, m.emojis || {})}); } catch (err) { alert("Couldn't edit: " + err.message); }
     }
     renderMsgs(false);
   };
@@ -1402,7 +1455,8 @@ service cloud.firestore {
     function inServer(s) { return signedIn() && request.auth.uid in get(/databases/$(database)/documents/servers/$(s)).data.members; }
     function inDm(d) { return signedIn() && request.auth.uid in get(/databases/$(database)/documents/dms/$(d)).data.members; }
     function okMsg() { return request.resource.data.uid == request.auth.uid && request.resource.data.text is string && request.resource.data.text.size() <= 2000
-      && (!('image' in request.resource.data) || (request.resource.data.image is string && request.resource.data.image.size() < 850000)); }
+      && (!('image' in request.resource.data) || (request.resource.data.image is string && request.resource.data.image.size() < 850000))
+      && (!('emojis' in request.resource.data) || (request.resource.data.emojis is map && request.resource.data.emojis.size() <= 6)); }
 
     match /users/{u} {
       allow read: if signedIn();
@@ -1412,14 +1466,15 @@ service cloud.firestore {
         && (!('photo' in request.resource.data) || request.resource.data.photo.size() < 600000)
         && (!('banner' in request.resource.data) || request.resource.data.banner.size() < 100000)
         && (!('bio' in request.resource.data) || request.resource.data.bio.size() <= 120);
+      match /emojis/{n} {
+        allow read, delete: if signedIn() && request.auth.uid == u;
+        allow create: if signedIn() && request.auth.uid == u && n.matches('[a-z0-9_]{2,24}') && request.resource.data.name == n
+          && request.resource.data.image is string && request.resource.data.image.size() < 150000;
+      }
     }
 
     match /emojis/{n} {
-      allow read: if signedIn();
-      allow create: if signedIn() && request.resource.data.uid == request.auth.uid
-        && n.matches('[a-z0-9_]{2,24}') && request.resource.data.name == n
-        && request.resource.data.image is string && request.resource.data.image.size() < 150000;
-      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+      allow read, delete: if signedIn() && resource.data.uid == request.auth.uid;
     }
 
     match /servers/{s} {
@@ -1441,6 +1496,13 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'icon'])
         && request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 32
         && (!('icon' in request.resource.data) || request.resource.data.icon.size() < 600000);
+      match /emojis/{n} {
+        allow read: if inServer(s);
+        allow create: if inServer(s) && request.resource.data.uid == request.auth.uid && n.matches('[a-z0-9_]{2,24}')
+          && request.resource.data.name == n && request.resource.data.image is string && request.resource.data.image.size() < 150000;
+        allow delete: if signedIn() && (resource.data.uid == request.auth.uid
+          || request.auth.uid == get(/databases/$(database)/documents/servers/$(s)).data.ownerId);
+      }
       match /channels/{c} {
         allow read, create: if inServer(s);
         match /voice/{u} {
@@ -1457,8 +1519,9 @@ service cloud.firestore {
           allow create: if inServer(s) && okMsg();
           allow update: if inServer(s) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions']);
           allow update: if inServer(s) && resource.data.uid == request.auth.uid
-            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'edited'])
-            && request.resource.data.text is string && request.resource.data.text.size() <= 2000;
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'edited', 'emojis'])
+            && request.resource.data.text is string && request.resource.data.text.size() <= 2000
+            && (!('emojis' in request.resource.data) || (request.resource.data.emojis is map && request.resource.data.emojis.size() <= 6));
           allow delete: if signedIn() && (resource.data.uid == request.auth.uid
             || request.auth.uid == get(/databases/$(database)/documents/servers/$(s)).data.ownerId);
         }
@@ -1474,8 +1537,9 @@ service cloud.firestore {
         allow create: if inDm(d) && okMsg();
         allow update: if inDm(d) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions']);
         allow update: if inDm(d) && resource.data.uid == request.auth.uid
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'edited'])
-          && request.resource.data.text is string && request.resource.data.text.size() <= 2000;
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'edited', 'emojis'])
+          && request.resource.data.text is string && request.resource.data.text.size() <= 2000
+          && (!('emojis' in request.resource.data) || (request.resource.data.emojis is map && request.resource.data.emojis.size() <= 6));
         allow delete: if inDm(d) && resource.data.uid == request.auth.uid;
       }
     }
