@@ -1031,12 +1031,12 @@ $("main").addEventListener("drop", e => {
 
 $("f").onsubmit = async e => {
   e.preventDefault();
-  const text = $("txt").value.trim(), img = attach;
+  const text = $("txt").value.trim(), img = attach, rp = replying;   // read the reply before it is cleared below
   if ((!text && !img) || !user || !curPath) return;
   $("txt").value = ""; attach = null; showPrev(); closeMp(); replying = null; showReply();
   const msg = {text, uid: user.uid, name: me, createdAt: serverTimestamp()};
   const emb = embedEmojis(text); if (Object.keys(emb).length) msg.emojis = emb;
-  const mn = findMentions(text), rp = replying;
+  const mn = findMentions(text);
   if (rp) { msg.replyTo = {id: rp.id, uid: rp.uid, name: rp.name, text: rp.text}; if (rp.uid !== user.uid && !mn.includes(rp.uid) && mn.length < 10) mn.push(rp.uid); }
   if (mn.length) msg.mentions = mn;
   const ctx = convContext();
