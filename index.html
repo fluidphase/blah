@@ -256,6 +256,19 @@ html.has-bg #rail{background:color-mix(in srgb,var(--bg1) var(--veil),transparen
 .banrow{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center;padding:8px 10px;background:var(--bg3);border-radius:8px;margin-top:6px;font-size:13px}
 .banrow .why{grid-column:1;color:var(--mut);overflow-wrap:anywhere}
 .banrow button{grid-row:1 / span 2;grid-column:2;padding:5px 12px}
+#gifBtn{font-size:12px;font-weight:700;letter-spacing:.04em;padding:4px 8px;border:1px solid var(--mut);border-radius:6px}
+#gifpop{position:absolute;left:16px;bottom:100%;width:min(440px,calc(100% - 32px));background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:4;display:grid;gap:8px}
+#gifGrid{columns:2;column-gap:6px;max-height:min(320px,45vh);overflow:auto}
+.gifi{display:block;width:100%;margin:0 0 6px;padding:0;background:var(--bg3);border-radius:8px;overflow:hidden;break-inside:avoid}
+.gifi img{display:block;width:100%;height:auto}
+.gcap{font-size:10px;color:var(--mut);opacity:.75}
+#cams{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:12px 16px}
+#cams:empty{display:none}
+.ctile{position:relative;width:min(240px,46%);aspect-ratio:4/3;background:#000;border-radius:14px;overflow:hidden}
+.ctile video{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in}
+.ctile.me video{transform:scaleX(-1)}
+.ctile.me.back video{transform:none}
+.cname{position:absolute;left:8px;bottom:6px;font-size:12px;font-weight:600;color:#fff;text-shadow:0 1px 3px #000;pointer-events:none}
 @media(max-width:700px){
  #app{grid-template-columns:1fr}
  #nav{position:fixed;inset:0 10% 0 0;z-index:5;transform:translateX(-100%);transition:transform .2s;box-shadow:4px 0 24px #0008}
@@ -318,19 +331,23 @@ html.has-bg #rail{background:color-mix(in srgb,var(--bg1) var(--veil),transparen
     <div id="vaudio" hidden></div>
     <div id="stage" hidden>
       <div id="shares"></div>
+      <div id="cams"></div>
       <div id="people"></div>
       <div id="sctl">
         <button type="button" id="sMute" class="rnd" aria-label="Mute" title="Mute">🎤</button>
         <button type="button" id="sShare" class="rnd" aria-label="Share screen" title="Share your screen">🖥️</button>
+        <button type="button" id="sCam" class="rnd" aria-label="Turn camera on" title="Camera on/off">📷</button>
+        <button type="button" id="sFlip" class="rnd" aria-label="Switch camera" title="Switch camera" hidden>🔄</button>
         <button type="button" id="sLeave" class="pill">Leave</button>
       </div>
     </div>
     <div id="msgs" aria-live="polite"></div>
     <form id="f">
       <div id="mpop" hidden role="listbox"></div>
+      <div id="gifpop" hidden><input id="gifQ" placeholder="Search GIPHY" aria-label="Search GIFs" autocomplete="off"><div id="gifGrid"></div><div class="small" style="margin:0">Powered by GIPHY</div></div>
       <div id="replybar" hidden><span class="txt">↩ Replying to <b id="rName"></b>: <span id="rText"></span></span><button type="button" class="ghost" id="rX" aria-label="Cancel reply">✕</button></div>
       <div id="prev" hidden><img id="pvImg" alt="Attached image preview"><button type="button" class="ghost" id="pvX">✕ Remove</button></div>
-      <div id="bar"><button type="button" id="attach" class="ghost" aria-label="Attach image" title="Attach image">📎</button><button type="button" id="emBtn" class="ghost" aria-label="Emojis" title="Emojis">😀</button><button type="button" id="micBtn" class="ghost" aria-label="Record a voice message" title="Record a voice message">🎤</button>
+      <div id="bar"><button type="button" id="attach" class="ghost" aria-label="Attach image" title="Attach image">📎</button><button type="button" id="emBtn" class="ghost" aria-label="Emojis" title="Emojis">😀</button><button type="button" id="micBtn" class="ghost" aria-label="Record a voice message" title="Record a voice message">🎤</button><button type="button" id="gifBtn" class="ghost" aria-label="Choose a GIF" title="Send a GIF">GIF</button>
         <input id="txt" maxlength="2000" autocomplete="off"><input type="file" id="imgFile" accept="image/*" hidden></div>
       <div id="recbar" hidden><span class="recdot"></span><span id="recT">0:00</span><span class="small">Recording… (max 1 min)</span>
         <button type="button" class="ghost" id="recCancel">Cancel</button><button type="button" id="recSend">Send</button></div>
@@ -502,6 +519,10 @@ import {getFirestore,collection,addDoc,setDoc,getDoc,getDocs,updateDoc,arrayUnio
 // (bottom of its sidebar), and paste it here. Leave "" to hide the "Join the official blah server" button.
 const OFFICIAL_SERVER = "";
 
+// GIF search uses GIPHY (Google shut down Tenor's API). Get a free key at developers.giphy.com -> Create an App -> API,
+// paste it here, and the GIF button starts working. Without a key you can still paste GIPHY links to send GIFs.
+const GIPHY_KEY = "";
+
 // Voice: STUN helps most home connections find each other. Strict networks (some school/work/mobile data)
 // also need a TURN relay. If your friends can't hear each other, add one here, e.g.
 // {urls: "turn:YOUR_HOST:3478", username: "...", credential: "..."}
@@ -518,7 +539,7 @@ let view = null;                       // {kind:"home"} | {kind:"dm", id} | {kin
 let unsubs = [], unsubChans = null, unsubMsgs = null, curPath = null;
 let profiles = {}, lastDocs = [], firstLoad = true, emojis = {}, myEmojis = {}, srvEmojis = {};
 let voice = null, vparts = {}, vunsubs = [], speakingNow = new Set(), staleTimer = 0, stage = false, editing = null;
-let inbox = {}, inboxReady = false, replying = null;
+let inbox = {}, inboxReady = false, replying = null, gifPending = null;
 let skew = 0, clockSynced = false, ban = null, adminBans = [], banTimer = 0;
 const watching = new Set();
 
@@ -895,7 +916,7 @@ function openMsgs() {
   linkTitle();
   contextMembers().forEach(watchProfile);
   { const ck = convKey(); if (curPath && ck && seen()) markRead(ck); }
-  $("txt").disabled = !curPath; $("attach").disabled = !curPath; $("micBtn").disabled = !curPath;
+  $("txt").disabled = !curPath; $("attach").disabled = !curPath; $("micBtn").disabled = !curPath; $("gifBtn").disabled = !curPath;
   $("txt").placeholder = curPath ? "Message " + title : "Nothing open yet";
   if (!curPath) {
     box.innerHTML = "";
@@ -961,6 +982,13 @@ function renderMsgs(fromSnap) {
       if (m.w > 0 && m.h > 0) { im.width = m.w; im.height = m.h; }
       im.src = m.image; im.onclick = () => { $("lImg").src = m.image; $("ldlg").showModal(); };
       c.append(im);
+    }
+    if (m.gif && isGifUrl(m.gif.url)) {
+      const g = document.createElement("img"); g.className = "pic"; g.alt = m.gif.t || "GIF"; g.loading = "lazy";
+      if (m.gif.w > 0 && m.gif.h > 0) { g.width = m.gif.w; g.height = m.gif.h; }
+      g.src = m.gif.url; g.onclick = () => { $("lImg").src = m.gif.url; $("ldlg").showModal(); };
+      const cap = document.createElement("div"); cap.className = "gcap"; cap.textContent = "via GIPHY";
+      c.append(g, cap);
     }
     if (isAudio(m.audio)) c.append(voicePlayer(m, path.join("/") + "/" + m.id));
     const rx = document.createElement("div"); rx.className = "rx";
@@ -1067,9 +1095,12 @@ $("main").addEventListener("drop", e => {
 
 $("f").onsubmit = async e => {
   e.preventDefault();
-  const text = $("txt").value.trim(), img = attach, rp = replying;   // read the reply before it is cleared below
-  if ((!text && !img) || !user || !curPath) return;
-  $("txt").value = ""; attach = null; showPrev(); closeMp(); replying = null; showReply();
+  const typed = $("txt").value;
+  let text = typed.trim(); const img = attach, rp = replying;   // read the reply before it is cleared below
+  let gf = gifPending;
+  { const gl = gifFromText(text); if (gl && !gf && !img) { gf = {url: gl, t: "GIF"}; text = ""; } }   // a message that is only a GIPHY link becomes a GIF
+  if ((!text && !img && !gf) || !user || !curPath) return;
+  $("txt").value = ""; attach = null; showPrev(); closeMp(); closeGif(); replying = null; gifPending = null; showReply();
   const msg = {text, uid: user.uid, name: me, createdAt: serverTimestamp()};
   const emb = embedEmojis(text); if (Object.keys(emb).length) msg.emojis = emb;
   const mn = findMentions(text);
@@ -1077,11 +1108,12 @@ $("f").onsubmit = async e => {
   if (mn.length) msg.mentions = mn;
   const ctx = convContext();
   if (img) Object.assign(msg, {image: img.data, w: img.w, h: img.h});
+  if (gf) msg.gif = gf;
   try {
     await addDoc(collection(db, ...curPath), msg);
-    notifyOthers(ctx, {text, image: !!img, mentions: mn});
+    notifyOthers(ctx, {text, image: !!img, gif: !!gf, mentions: mn});
     const box = $("msgs"); box.scrollTop = box.scrollHeight;
-  } catch (err) { alert("Send failed: " + err.message); $("txt").value = text; attach = img; showPrev(); replying = rp; showReply(); }
+  } catch (err) { alert("Send failed: " + err.message); $("txt").value = typed; attach = img; showPrev(); replying = rp; gifPending = gf; showReply(); }
 };
 /* ---------- custom emojis ---------- */
 function emojiImg(name, big, src) {
@@ -1274,6 +1306,7 @@ function showVoiceBar() {
   $("vTitle").textContent = "🔊 " + v.cname; $("vMute").textContent = v.muted ? "Unmute" : "Mute";
   $("sMute").textContent = v.muted ? "🔇" : "🎤"; $("sMute").classList.toggle("off", v.muted);
   $("sShare").classList.toggle("on", !!v.screen);
+  $("sCam").classList.toggle("on", !!v.cam); $("sFlip").hidden = !v.cam || !matchMedia("(pointer:coarse)").matches;
 }
 const sendSignal = (v, to, type, data) =>
   addDoc(collection(db, ...v.base, to, "signals"), {from: user.uid, to, type, data: JSON.stringify(data), ts: serverTimestamp()}).catch(() => {});
@@ -1283,9 +1316,9 @@ async function joinVoice(sid, cid, cname) {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return alert("Voice needs a secure (https) page and a browser that supports microphones.");
   let stream;
   try { stream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: true, noiseSuppression: true, autoGainControl: true}}); }
-  catch (err) { return alert("Couldn't use your microphone: " + err.message); }
+  catch (err) { return mediaError(err, "microphone"); }
   const base = ["servers", sid, "channels", cid, "voice"];
-  const v = voice = {sid, cid, cname, base, stream, pcs: {}, peers: [], muted: false, sin: {}, sout: {}};
+  const v = voice = {sid, cid, cname, base, stream, pcs: {}, peers: [], muted: false, sin: {}, sout: {}, cin: {}, cout: {}};
   try {
     // clear leftovers from an earlier session, listen for signals, and only then announce ourselves
     const old = await getDocs(collection(db, ...base, user.uid, "signals"));
@@ -1299,7 +1332,7 @@ async function joinVoice(sid, cid, cname) {
     await setDoc(doc(db, ...base, user.uid), {uid: user.uid, name: me, muted: false, joinedAt: serverTimestamp(), seen: serverTimestamp()});
   } catch (err) {
     v.unsubSig && v.unsubSig(); stream.getTracks().forEach(t => t.stop()); voice = null;
-    return alert("Couldn't join voice: " + err.message + " (check your Firestore rules)");
+    return alert(err.code === "permission-denied" ? "Couldn't join voice: Firestore said no. Make sure the latest rules are published, and that you're a member of this server and not banned." : "Couldn't join voice: " + err.message);
   }
   v.hb = setInterval(() => { updateDoc(doc(db, ...base, user.uid), {seen: serverTimestamp()}).catch(() => {}); syncPeers(); }, 25000);
   v.unsubPeers = onSnapshot(collection(db, ...base), snap => {
@@ -1318,6 +1351,9 @@ function syncPeers() {
   if (v.screen) for (const uid of ids) if (!v.sout[uid]) sendScreenTo(v, uid).catch(() => {});
   for (const uid of Object.keys(v.sout)) if (!ids.has(uid)) { try { v.sout[uid].pc.close(); } catch {} delete v.sout[uid]; }
   for (const uid of Object.keys(v.sin)) if (!ids.has(uid)) closeScreenIn(v, uid);
+  if (v.cam) for (const uid of ids) if (!v.cout[uid]) sendCamTo(v, uid).catch(() => {});
+  for (const uid of Object.keys(v.cout)) if (!ids.has(uid)) { try { v.cout[uid].pc.close(); } catch {} delete v.cout[uid]; }
+  for (const uid of Object.keys(v.cin)) if (!ids.has(uid)) closeCamIn(v, uid);
 }
 async function makePeer(v, uid, offerer) {
   const pc = new RTCPeerConnection({iceServers: ICE_SERVERS});
@@ -1375,15 +1411,31 @@ async function handleSignal(v, s) {
     const en = data.dir === "toViewer" ? v.sin[s.from] : v.sout[s.from]; if (!en) return;
     if (en.pc.remoteDescription) { try { await en.pc.addIceCandidate(data.c); } catch {} } else en.pending.push(data.c);
   } else if (s.type === "sstop") closeScreenIn(v, s.from);
+  else if (s.type === "coffer") {                 // someone turned their camera on (one-way video connection, separate from voice)
+    closeCamIn(v, s.from);
+    const pc = new RTCPeerConnection({iceServers: ICE_SERVERS}), en = v.cin[s.from] = {pc, pending: []};
+    pc.ontrack = e => addCamTile(s.from, e.streams[0], false);
+    pc.onicecandidate = e => { if (e.candidate) sendSignal(v, s.from, "cice", {dir: "toSharer", c: e.candidate.toJSON()}); };
+    await pc.setRemoteDescription(data); await drainIce(en);
+    const ans = await pc.createAnswer(); await pc.setLocalDescription(ans);
+    sendSignal(v, s.from, "canswer", {type: ans.type, sdp: ans.sdp});
+  } else if (s.type === "canswer") {
+    const en = v.cout[s.from]; if (!en) return;
+    await en.pc.setRemoteDescription(data); await drainIce(en);
+  } else if (s.type === "cice") {
+    const en = data.dir === "toViewer" ? v.cin[s.from] : v.cout[s.from]; if (!en) return;
+    if (en.pc.remoteDescription) { try { await en.pc.addIceCandidate(data.c); } catch {} } else en.pending.push(data.c);
+  } else if (s.type === "cstop") closeCamIn(v, s.from);
 }
 async function leaveVoice() {
-  if (!voice) return; stopShare();
+  if (!voice) return; stopShare(); stopCam();
   const v = voice; voice = null; const wasStage = stage; stage = false;
   clearInterval(v.hb); clearInterval(lvlTimer); lvlTimer = 0;
   v.unsubPeers && v.unsubPeers(); v.unsubSig && v.unsubSig();
   Object.keys(v.pcs).forEach(uid => closePeer(v, uid));
   v.stream.getTracks().forEach(t => t.stop());
   Object.keys(v.sin).forEach(uid => closeScreenIn(v, uid)); $("shares").innerHTML = "";
+  Object.keys(v.cin).forEach(uid => closeCamIn(v, uid)); $("cams").innerHTML = "";
   delete levels[user.uid]; speakingNow.clear();
   showVoiceBar(); renderSide(); if (wasStage && view) openMsgs();
   try { await deleteDoc(doc(db, ...v.base, user.uid)); } catch {}
@@ -1509,7 +1561,7 @@ function editBox(path, m) {
   const i = document.createElement("input"); i.maxLength = 2000; i.value = editing.value; i.setAttribute("aria-label", "Edit message");
   i.oninput = () => { editing.value = i.value; };
   const save = async () => {
-    const t = i.value.trim(); if (!t && !m.image) return;
+    const t = i.value.trim(); if (!t && !m.image && !m.gif) return;
     editing = null;
     if (t !== (m.text || "")) {
       try { await updateDoc(doc(db, ...path, m.id), {text: t, edited: true, emojis: embedEmojis(t, m.emojis || {})}); } catch (err) { alert("Couldn't edit: " + err.message); }
@@ -1703,7 +1755,7 @@ function mentionNodes(t, re) {
 // every recipient gets one small "inbox" entry per conversation (unread count + latest message), not a copy of each message
 async function notifyOthers(ctx, info) {
   if (!ctx || !ctx.recips.length) return;
-  const snippet = (info.text || (info.image ? "📷 Image" : info.audio ? "🎤 Voice message" : "")).slice(0, 100);
+  const snippet = (info.text || (info.gif ? "🎞 GIF" : info.image ? "📷 Image" : info.audio ? "🎤 Voice message" : "")).slice(0, 100);
   const b = writeBatch(db);
   for (const r of ctx.recips.slice(0, 200)) {
     const hit = (info.mentions || []).includes(r);
@@ -1962,7 +2014,7 @@ async function startRec() {
   if (rec || !curPath) return;
   let stream;
   try { stream = await navigator.mediaDevices.getUserMedia({audio: {echoCancellation: true, noiseSuppression: true}}); }
-  catch (err) { return alert("Couldn't use your microphone: " + err.message); }
+  catch (err) { return mediaError(err, "microphone"); }
   const mime = recMime(); let mr;
   try { mr = new MediaRecorder(stream, mime ? {mimeType: mime, audioBitsPerSecond: 24000} : {audioBitsPerSecond: 24000}); }
   catch (err) { stream.getTracks().forEach(t => t.stop()); return alert("Recording isn't supported in this browser: " + err.message); }
@@ -2072,7 +2124,7 @@ $("pFrameClear").onclick = () => { draft.frame = {t: "none"}; drawProfile(); };
 $("pFrameReset").onclick = () => { Object.assign(draft.frame, {s: 125, x: 0, y: 0, r: 0}); drawProfile(); };
 
 // replying: a reply keeps a small copy of the original (who + a snippet) and pings its author
-const snippetOf = m => (m.text || (m.image ? "📷 Image" : m.audio ? "🎤 Voice message" : "")).slice(0, 100);
+const snippetOf = m => (m.text || (m.gif ? "🎞 GIF" : m.image ? "📷 Image" : m.audio ? "🎤 Voice message" : "")).slice(0, 100);
 function showReply() {
   $("replybar").hidden = !replying;
   if (replying) { $("rName").textContent = replying.name; $("rText").textContent = replying.text; }
@@ -2189,6 +2241,115 @@ $("bnGo").onclick = async () => {
 };
 $("pBanBtn").onclick = () => { $("pdlg").close(); $("setBtn").click(); $("bnUser").value = pUname; $("bnReason").focus(); };
 
+/* ---------- GIFs (GIPHY) ---------- */
+const GIF_RE = /^https:\/\/(media[0-9]*|i)\.giphy\.com\/\S+$/i;
+const isGifUrl = u => typeof u === "string" && u.length < 500 && GIF_RE.test(u);
+function gifFromText(t) {                     // a lone GIPHY link (media link or page link) turns into a GIF message
+  t = (t || "").trim(); if (!t || /\s/.test(t)) return null;
+  if (isGifUrl(t)) return t;
+  const m = /^https?:\/\/(?:www\.)?giphy\.com\/(?:gifs|stickers|embed)\/(?:[^/?#]*-)?([A-Za-z0-9]+)\/?(?:[?#].*)?$/i.exec(t);
+  return m ? "https://media.giphy.com/media/" + m[1] + "/giphy.gif" : null;
+}
+let gifTimer = 0, gifSeq = 0;
+const closeGif = () => { $("gifpop").hidden = true; };
+function sendNow() { const f = $("f"); if (f.requestSubmit) f.requestSubmit(); else f.dispatchEvent(new Event("submit", {cancelable: true, bubbles: true})); }
+async function loadGifs(q) {
+  const grid = $("gifGrid"), seq = ++gifSeq;
+  const note = t => { grid.innerHTML = ""; const d = document.createElement("div"); d.className = "small"; d.style.columnSpan = "all"; d.textContent = t; grid.append(d); };
+  if (!GIPHY_KEY) return note("GIF search isn't set up yet. The admin needs to paste a free GIPHY key into GIPHY_KEY near the top of index.html. You can still paste a GIPHY link to send a GIF, or attach one with the paperclip.");
+  note("Loading…");
+  try {
+    const url = "https://api.giphy.com/v1/gifs/" + (q ? "search" : "trending") + "?api_key=" + encodeURIComponent(GIPHY_KEY) + "&limit=24&rating=pg-13" + (q ? "&q=" + encodeURIComponent(q) : "");
+    const r = await fetch(url);
+    if (!r.ok) throw new Error("GIPHY said " + r.status + (r.status === 429 ? " (too many searches, try again soon)" : r.status === 401 || r.status === 403 ? " (check the key)" : ""));
+    const list = (await r.json()).data || [];
+    if (seq !== gifSeq) return;
+    grid.innerHTML = ""; let n = 0;
+    for (const g of list) {
+      const th = g.images && (g.images.fixed_width || g.images.downsized), full = g.images && (g.images.downsized || g.images.fixed_width);
+      if (!th || !full || !isGifUrl(th.url) || !isGifUrl(full.url)) continue;
+      const b = document.createElement("button"); b.type = "button"; b.className = "gifi"; b.title = g.title || "GIF";
+      const im = document.createElement("img"); im.src = th.url; im.alt = g.title || "GIF"; im.loading = "lazy"; b.append(im);
+      b.onclick = () => { gifPending = {url: full.url, w: +full.width || 0, h: +full.height || 0, t: (g.title || "GIF").slice(0, 80)}; closeGif(); sendNow(); };
+      grid.append(b); n++;
+    }
+    if (!n) note("No GIFs found.");
+  } catch (err) { if (seq === gifSeq) note("Couldn't load GIFs: " + err.message); }
+}
+$("gifBtn").onclick = () => {
+  const p = $("gifpop"); p.hidden = !p.hidden;
+  if (!p.hidden) { $("gifQ").value = ""; loadGifs(""); setTimeout(() => $("gifQ").focus(), 0); }
+};
+$("gifQ").addEventListener("input", () => { clearTimeout(gifTimer); gifTimer = setTimeout(() => loadGifs($("gifQ").value.trim()), 350); });
+$("gifQ").addEventListener("keydown", e => { if (e.key === "Escape") closeGif(); });
+document.addEventListener("click", e => { if (!$("gifpop").hidden && !e.target.closest("#gifpop, #gifBtn")) closeGif(); });
+
+/* ---------- camera in voice channels (video calling) ---------- */
+function mediaError(err, what) {
+  const n = err && err.name;
+  if (n === "NotAllowedError" || n === "SecurityError")
+    alert("blah doesn't have permission to use your " + what + ".\n\nAllow it in your browser: tap the lock or settings icon next to the address bar, open Site settings, set " + what + " to Allow, then try again.\n\nIf you opened blah inside another app (Discord, Messenger, Instagram...), open it in Chrome or Safari instead.");
+  else if (n === "NotFoundError" || n === "OverconstrainedError") alert("No " + what + " was found on this device.");
+  else if (n === "NotReadableError") alert("Your " + what + " is busy. Close other apps that are using it, then try again.");
+  else alert("Couldn't use your " + what + ": " + ((err && err.message) || err));
+}
+let facing = "user";
+const camConstraints = () => ({video: {width: {ideal: 640}, height: {ideal: 480}, frameRate: {ideal: 24}, facingMode: {ideal: facing}}, audio: false});
+if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) $("sCam").hidden = true;
+function addCamTile(uid, stream, local) {
+  removeCamTile(uid);
+  const t = document.createElement("div"); t.className = "ctile" + (local ? " me" : "") + (local && facing === "environment" ? " back" : ""); t.dataset.uid = uid;
+  const vid = document.createElement("video"); vid.autoplay = true; vid.muted = true; vid.playsInline = true; vid.srcObject = stream; vid.play().catch(() => {});
+  vid.onclick = () => { if (vid.requestFullscreen) vid.requestFullscreen().catch(() => {}); };
+  const peer = voice && voice.peers.find(q => q.uid === uid);
+  const c = document.createElement("div"); c.className = "cname"; c.textContent = local ? "You" : shown(uid, peer ? peer.name : "Someone");
+  t.append(vid, c); $("cams").append(t);
+}
+function removeCamTile(uid) { const t = $("cams").querySelector('[data-uid="' + uid + '"]'); if (t) t.remove(); }
+function closeCamIn(v, uid) {
+  const en = v.cin[uid]; if (!en) return;
+  try { en.pc.close(); } catch {} delete v.cin[uid]; removeCamTile(uid);
+}
+async function sendCamTo(v, uid) {
+  if (!v.cam || v.cout[uid]) return;
+  const pc = new RTCPeerConnection({iceServers: ICE_SERVERS}), en = v.cout[uid] = {pc, pending: []};
+  const sender = pc.addTrack(v.cam.getVideoTracks()[0], v.cam);
+  pc.onicecandidate = e => { if (e.candidate) sendSignal(v, uid, "cice", {dir: "toViewer", c: e.candidate.toJSON()}); };
+  const offer = await pc.createOffer(); await pc.setLocalDescription(offer);
+  try { const prm = sender.getParameters(); if (!prm.encodings || !prm.encodings.length) prm.encodings = [{}]; prm.encodings[0].maxBitrate = 700000; await sender.setParameters(prm); } catch {}
+  sendSignal(v, uid, "coffer", {type: offer.type, sdp: offer.sdp});
+}
+async function startCam() {
+  const v = voice; if (!v || v.cam) return;
+  let st;
+  try { st = await navigator.mediaDevices.getUserMedia(camConstraints()); }
+  catch (err) { return mediaError(err, "camera"); }
+  v.cam = st; st.getVideoTracks()[0].onended = () => stopCam();
+  addCamTile(user.uid, st, true);
+  v.peers.filter(fresh).map(q => q.uid).filter(u => u !== user.uid).forEach(uid => sendCamTo(v, uid).catch(() => {}));
+  showVoiceBar();
+}
+function stopCam() {
+  const v = voice; if (!v || !v.cam) return;
+  v.cam.getTracks().forEach(t => { t.onended = null; t.stop(); }); v.cam = null;
+  Object.keys(v.cout).forEach(uid => { sendSignal(v, uid, "cstop", {}); try { v.cout[uid].pc.close(); } catch {} delete v.cout[uid]; });
+  removeCamTile(user.uid); showVoiceBar();
+}
+async function flipCam() {                   // front <-> back camera on phones, without dropping anyone's video
+  const v = voice; if (!v || !v.cam) return;
+  const old = v.cam.getVideoTracks()[0]; facing = facing === "user" ? "environment" : "user";
+  try {
+    const st = await navigator.mediaDevices.getUserMedia(camConstraints()), nt = st.getVideoTracks()[0];
+    for (const uid of Object.keys(v.cout)) {
+      const s = v.cout[uid].pc.getSenders().find(x => x.track && x.track.kind === "video");
+      if (s) await s.replaceTrack(nt).catch(() => {});
+    }
+    old.onended = null; old.stop(); nt.onended = () => stopCam(); v.cam = st; addCamTile(user.uid, st, true);
+  } catch (err) { facing = facing === "user" ? "environment" : "user"; alert("Couldn't switch cameras: " + err.message); }
+}
+$("sCam").onclick = () => voice && (voice.cam ? stopCam() : startCam());
+$("sFlip").onclick = flipCam;
+
 /* ---------- server settings (owner only) ---------- */
 const drawServer = () => paintServer($("sIcon"), {name: $("sName").value || "?", icon: sdraft.icon});
 $("srvSet").onclick = () => {
@@ -2228,7 +2389,9 @@ service cloud.firestore {
       && (!('emojis' in request.resource.data) || (request.resource.data.emojis is map && request.resource.data.emojis.size() <= 6))
       && (!('audio' in request.resource.data) || (request.resource.data.audio is string && request.resource.data.audio.size() < 900000))
       && (!('mentions' in request.resource.data) || (request.resource.data.mentions is list && request.resource.data.mentions.size() <= 10))
-      && (!('replyTo' in request.resource.data) || (request.resource.data.replyTo is map && request.resource.data.replyTo.size() <= 5)); }
+      && (!('replyTo' in request.resource.data) || (request.resource.data.replyTo is map && request.resource.data.replyTo.size() <= 5))
+      && (!('gif' in request.resource.data) || (request.resource.data.gif is map && request.resource.data.gif.url is string && request.resource.data.gif.url.size() < 500
+          && request.resource.data.gif.url.matches('https://(media[0-9]*|i)[.]giphy[.]com/.*'))); }
 
     match /users/{u} {
       allow read: if signedIn();
