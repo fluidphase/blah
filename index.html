@@ -1907,6 +1907,12 @@ function pickMention(i) {
 $("txt").addEventListener("input", updateMp);
 $("txt").addEventListener("click", updateMp);
 $("txt").addEventListener("keydown", e => {
+  if (e.key === "Enter" && !mp.open) {
+    e.preventDefault();
+    sendNow();
+  }
+});
+$("txt").addEventListener("keydown", e => {
   if (!mp.open) return;
   if (e.key === "ArrowDown") { e.preventDefault(); mp.idx = (mp.idx + 1) % mp.items.length; drawMp(); }
   else if (e.key === "ArrowUp") { e.preventDefault(); mp.idx = (mp.idx - 1 + mp.items.length) % mp.items.length; drawMp(); }
